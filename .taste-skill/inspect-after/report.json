@@ -1,0 +1,1391 @@
+{
+ "url": "http://localhost:8081",
+ "at": "2026-10-29T09:59:03.182Z",
+ "allow": [
+  "palette-purple"
+ ],
+ "viewports": [
+  {
+   "width": 1440,
+   "height": 900,
+   "load": "load",
+   "screens": 1,
+   "filled": [
+    0.33
+   ],
+   "motion": {
+    "elements": 0,
+    "css": 0,
+    "transitions": 0,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "page": {
+     "height": 900,
+     "screens": 1,
+     "words": 134,
+     "img": 0,
+     "video": 0,
+     "canvas": 1,
+     "svg": 12,
+     "sections": 0,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Hi Chisom",
+     "words": 2,
+     "chars": 9,
+     "lines": 1,
+     "size": 30,
+     "vw": 2.1,
+     "font": "Instrument Sans",
+     "weight": 700,
+     "tracking": -0.02,
+     "leading": 1.2,
+     "top": 145,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "Hi Chisom",
+     "words": 2,
+     "lines": 1,
+     "size": 30,
+     "font": "Instrument Sans"
+    },
+    "headings": [
+     {
+      "text": "Hi Chisom",
+      "words": 2,
+      "chars": 9,
+      "lines": 1,
+      "size": 30,
+      "vw": 2.1,
+      "font": "Instrument Sans",
+      "weight": 700,
+      "tracking": -0.02,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.18,
+      "top": 145,
+      "tag": "h1",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 1,
+     "maxLines": 1,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": null,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Instrument Sans",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      20,
+      30
+     ],
+     "sizeCount": 9,
+     "notLoaded": [],
+     "body": {
+      "font": "Instrument Sans",
+      "size": 14,
+      "leading": 1.43,
+      "weight": 400,
+      "tracking": 0,
+      "contrast": 9.7
+     },
+     "measureChars": 37,
+     "max": {
+      "size": 30,
+      "vw": 2.1,
+      "font": "Instrument Sans",
+      "text": "Hi Chisom"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0,
+     "centerShare": 0,
+     "smallText": 9
+    },
+    "eyebrows": [
+     {
+      "text": "UNN · 200L Electrical Eng",
+      "above": "Hi Chisom",
+      "upper": false,
+      "tracked": false,
+      "mono": false,
+      "pill": true,
+      "size": 12,
+      "top": 118
+     }
+    ],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#eae2fc",
+     "bodyBgHsl": {
+      "h": 258,
+      "s": 0.81,
+      "l": 0.94
+     },
+     "dark": false,
+     "sectionBgs": [
+      {
+       "color": "#eae2fc",
+       "top": 0,
+       "hsl": {
+        "h": 258,
+        "s": 0.81,
+        "l": 0.94
+       }
+      },
+      {
+       "color": "#f6f3ff",
+       "top": 20,
+       "hsl": {
+        "h": 255,
+        "s": 1,
+        "l": 0.98
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#4a4166",
+       "share": 0.24
+      },
+      {
+       "color": "#140e28",
+       "share": 0.23
+      },
+      {
+       "color": "#4c1d95",
+       "share": 0.18
+      },
+      {
+       "color": "#15803d",
+       "share": 0.12
+      },
+      {
+       "color": "#3b3254",
+       "share": 0.11
+      }
+     ],
+     "button": {
+      "bg": "#ede4ff",
+      "hsl": {
+       "h": 260,
+       "s": 1,
+       "l": 0.95
+      },
+      "fg": "#000000"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 1,
+     "inHero": 1,
+     "radius": "pill",
+     "height": 30,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "History"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 4,
+     "hairlineSamples": [
+      "div.css-view-g5y9jx.r-alignItems-1awozwy 458px",
+      "div.css-view-g5y9jx.r-alignItems-1awozwy 384px",
+      "div.css-view-g5y9jx.r-alignItems-1awozwy 384px",
+      "div.css-view-g5y9jx.r-alignItems-1awozwy 458px"
+     ],
+     "outlinedBoxes": 6,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 6,
+     "boxRadius": 20,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [],
+    "nav": null,
+    "fontsLoaded": [
+     "instrument sans"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "pageH": 900,
+    "margins": {
+     "left": 509,
+     "right": 509
+    },
+    "sections": [],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Hi Chisom",
+      "size": 30,
+      "top": 145,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 530,
+      "n": 1
+     }
+    ],
+    "leftBlocks": 1,
+    "bodySize": 14,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0.29,
+    "voidBox": {
+     "x": 0,
+     "y": 120,
+     "w": 480,
+     "h": 780
+    }
+   },
+   "app": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "dark": false,
+    "ground": "#eae2fc",
+    "sidebar": null,
+    "topbar": null,
+    "canvas": {
+     "left": 509,
+     "right": 509
+    },
+    "hero": {
+     "text": "Hi Chisom",
+     "words": 2,
+     "chars": 9,
+     "lines": 1,
+     "size": 30,
+     "vw": 2.1,
+     "font": "Instrument Sans",
+     "weight": 700,
+     "tracking": -0.02,
+     "leading": 1.2,
+     "top": 145,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 0,
+    "layout": {
+     "panels": 1,
+     "firstScreen": 1,
+     "ragged": [],
+     "voids": []
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 7,
+     "radii": [
+      [
+       20,
+       3
+      ],
+      [
+       32,
+       1
+      ],
+      [
+       24,
+       1
+      ],
+      [
+       16,
+       1
+      ],
+      [
+       14,
+       1
+      ]
+     ],
+     "heavyBorders": 0,
+     "borderSamples": [],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 0
+    },
+    "chips": {
+     "count": 2,
+     "hues": 1,
+     "samples": [
+      {
+       "hue": 258,
+       "size": 30,
+       "radius": "15px"
+      },
+      {
+       "hue": 258,
+       "size": 30,
+       "radius": "15px"
+      }
+     ]
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 0,
+     "tabularShare": null,
+     "kpiMax": null
+    },
+    "rows": null,
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.26,
+     "tiny": 0,
+     "tinySamples": [],
+     "sizes": [
+      12,
+      13,
+      14,
+      16,
+      17,
+      18,
+      20,
+      30
+     ]
+    },
+    "title": {
+     "text": "Hi Chisom",
+     "size": 30,
+     "top": 145
+    },
+    "colourShare": 0.008
+   },
+   "consoleErrors": []
+  },
+  {
+   "width": 768,
+   "height": 1024,
+   "load": "load",
+   "screens": 1,
+   "filled": [
+    0.58
+   ],
+   "motion": {
+    "elements": 0,
+    "css": 0,
+    "transitions": 0,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "page": {
+     "height": 1024,
+     "screens": 1,
+     "words": 134,
+     "img": 0,
+     "video": 0,
+     "canvas": 1,
+     "svg": 12,
+     "sections": 0,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Hi Chisom",
+     "words": 2,
+     "chars": 9,
+     "lines": 1,
+     "size": 30,
+     "vw": 3.9,
+     "font": "Instrument Sans",
+     "weight": 700,
+     "tracking": -0.02,
+     "leading": 1.2,
+     "top": 145,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "Hi Chisom",
+     "words": 2,
+     "lines": 1,
+     "size": 30,
+     "font": "Instrument Sans"
+    },
+    "headings": [
+     {
+      "text": "Hi Chisom",
+      "words": 2,
+      "chars": 9,
+      "lines": 1,
+      "size": 30,
+      "vw": 3.9,
+      "font": "Instrument Sans",
+      "weight": 700,
+      "tracking": -0.02,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.33,
+      "top": 145,
+      "tag": "h1",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 1,
+     "maxLines": 1,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": null,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Instrument Sans",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      20,
+      30
+     ],
+     "sizeCount": 9,
+     "notLoaded": [],
+     "body": {
+      "font": "Instrument Sans",
+      "size": 14,
+      "leading": 1.43,
+      "weight": 400,
+      "tracking": 0,
+      "contrast": 9.7
+     },
+     "measureChars": 37,
+     "max": {
+      "size": 30,
+      "vw": 3.9,
+      "font": "Instrument Sans",
+      "text": "Hi Chisom"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0,
+     "centerShare": 0,
+     "smallText": 9
+    },
+    "eyebrows": [
+     {
+      "text": "UNN · 200L Electrical Eng",
+      "above": "Hi Chisom",
+      "upper": false,
+      "tracked": false,
+      "mono": false,
+      "pill": true,
+      "size": 12,
+      "top": 118
+     }
+    ],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#eae2fc",
+     "bodyBgHsl": {
+      "h": 258,
+      "s": 0.81,
+      "l": 0.94
+     },
+     "dark": false,
+     "sectionBgs": [
+      {
+       "color": "#eae2fc",
+       "top": 0,
+       "hsl": {
+        "h": 258,
+        "s": 0.81,
+        "l": 0.94
+       }
+      },
+      {
+       "color": "#f6f3ff",
+       "top": 20,
+       "hsl": {
+        "h": 255,
+        "s": 1,
+        "l": 0.98
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#4a4166",
+       "share": 0.24
+      },
+      {
+       "color": "#140e28",
+       "share": 0.23
+      },
+      {
+       "color": "#4c1d95",
+       "share": 0.18
+      },
+      {
+       "color": "#15803d",
+       "share": 0.12
+      },
+      {
+       "color": "#3b3254",
+       "share": 0.11
+      }
+     ],
+     "button": {
+      "bg": "#ede4ff",
+      "hsl": {
+       "h": 260,
+       "s": 1,
+       "l": 0.95
+      },
+      "fg": "#000000"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 1,
+     "inHero": 1,
+     "radius": "pill",
+     "height": 30,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "History"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 4,
+     "hairlineSamples": [
+      "div.css-view-g5y9jx.r-alignItems-1awozwy 458px",
+      "div.css-view-g5y9jx.r-alignItems-1awozwy 384px",
+      "div.css-view-g5y9jx.r-alignItems-1awozwy 384px",
+      "div.css-view-g5y9jx.r-alignItems-1awozwy 458px"
+     ],
+     "outlinedBoxes": 6,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 6,
+     "boxRadius": 20,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [],
+    "nav": null,
+    "fontsLoaded": [
+     "instrument sans"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "pageH": 1024,
+    "margins": {
+     "left": 173,
+     "right": 173
+    },
+    "sections": [],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Hi Chisom",
+      "size": 30,
+      "top": 145,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 194,
+      "n": 1
+     }
+    ],
+    "leftBlocks": 1,
+    "bodySize": 14,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "dark": false,
+    "ground": "#eae2fc",
+    "sidebar": null,
+    "topbar": null,
+    "canvas": {
+     "left": 173,
+     "right": 173
+    },
+    "hero": {
+     "text": "Hi Chisom",
+     "words": 2,
+     "chars": 9,
+     "lines": 1,
+     "size": 30,
+     "vw": 3.9,
+     "font": "Instrument Sans",
+     "weight": 700,
+     "tracking": -0.02,
+     "leading": 1.2,
+     "top": 145,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 0,
+    "layout": {
+     "panels": 1,
+     "firstScreen": 1,
+     "ragged": [],
+     "voids": []
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 7,
+     "radii": [
+      [
+       20,
+       3
+      ],
+      [
+       32,
+       1
+      ],
+      [
+       24,
+       1
+      ],
+      [
+       16,
+       1
+      ],
+      [
+       14,
+       1
+      ]
+     ],
+     "heavyBorders": 0,
+     "borderSamples": [],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 0
+    },
+    "chips": {
+     "count": 2,
+     "hues": 1,
+     "samples": [
+      {
+       "hue": 258,
+       "size": 30,
+       "radius": "15px"
+      },
+      {
+       "hue": 258,
+       "size": 30,
+       "radius": "15px"
+      }
+     ]
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 0,
+     "tabularShare": null,
+     "kpiMax": null
+    },
+    "rows": null,
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.26,
+     "tiny": 0,
+     "tinySamples": [],
+     "sizes": [
+      12,
+      13,
+      14,
+      16,
+      17,
+      18,
+      20,
+      30
+     ]
+    },
+    "title": {
+     "text": "Hi Chisom",
+     "size": 30,
+     "top": 145
+    },
+    "colourShare": 0.014
+   },
+   "consoleErrors": []
+  },
+  {
+   "width": 390,
+   "height": 844,
+   "load": "load",
+   "screens": 1,
+   "filled": [
+    1
+   ],
+   "motion": {
+    "elements": 0,
+    "css": 0,
+    "transitions": 0,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "page": {
+     "height": 844,
+     "screens": 1,
+     "words": 134,
+     "img": 0,
+     "video": 0,
+     "canvas": 1,
+     "svg": 12,
+     "sections": 0,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Hi Chisom",
+     "words": 2,
+     "chars": 9,
+     "lines": 1,
+     "size": 30,
+     "vw": 7.7,
+     "font": "Instrument Sans",
+     "weight": 700,
+     "tracking": -0.02,
+     "leading": 1.2,
+     "top": 124,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "Hi Chisom",
+     "words": 2,
+     "lines": 1,
+     "size": 30,
+     "font": "Instrument Sans"
+    },
+    "headings": [
+     {
+      "text": "Hi Chisom",
+      "words": 2,
+      "chars": 9,
+      "lines": 1,
+      "size": 30,
+      "vw": 7.7,
+      "font": "Instrument Sans",
+      "weight": 700,
+      "tracking": -0.02,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.48,
+      "top": 124,
+      "tag": "h1",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 1,
+     "maxLines": 1,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": null,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Instrument Sans",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      20,
+      30
+     ],
+     "sizeCount": 9,
+     "notLoaded": [],
+     "body": {
+      "font": "Instrument Sans",
+      "size": 14,
+      "leading": 1.43,
+      "weight": 400,
+      "tracking": 0,
+      "contrast": 9.7
+     },
+     "measureChars": 27,
+     "max": {
+      "size": 30,
+      "vw": 7.7,
+      "font": "Instrument Sans",
+      "text": "Hi Chisom"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0,
+     "centerShare": 0,
+     "smallText": 9
+    },
+    "eyebrows": [
+     {
+      "text": "UNN · 200L Electrical Eng",
+      "above": "Hi Chisom",
+      "upper": false,
+      "tracked": false,
+      "mono": false,
+      "pill": true,
+      "size": 12,
+      "top": 97
+     }
+    ],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#eae2fc",
+     "bodyBgHsl": {
+      "h": 258,
+      "s": 0.81,
+      "l": 0.94
+     },
+     "dark": false,
+     "sectionBgs": [
+      {
+       "color": "#eae2fc",
+       "top": 0,
+       "hsl": {
+        "h": 258,
+        "s": 0.81,
+        "l": 0.94
+       }
+      },
+      {
+       "color": "#f6f3ff",
+       "top": 0,
+       "hsl": {
+        "h": 255,
+        "s": 1,
+        "l": 0.98
+       }
+      },
+      {
+       "color": "#ffffff",
+       "top": 396,
+       "hsl": {
+        "h": 0,
+        "s": 0,
+        "l": 1
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#4a4166",
+       "share": 0.24
+      },
+      {
+       "color": "#140e28",
+       "share": 0.23
+      },
+      {
+       "color": "#4c1d95",
+       "share": 0.18
+      },
+      {
+       "color": "#15803d",
+       "share": 0.12
+      },
+      {
+       "color": "#3b3254",
+       "share": 0.11
+      }
+     ],
+     "button": {
+      "bg": "#ede4ff",
+      "hsl": {
+       "h": 260,
+       "s": 1,
+       "l": 0.95
+      },
+      "fg": "#000000"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 1,
+     "inHero": 1,
+     "radius": "pill",
+     "height": 30,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "History"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 4,
+     "hairlineSamples": [
+      "div.css-view-g5y9jx.r-alignItems-1awozwy 390px",
+      "div.css-view-g5y9jx.r-alignItems-1awozwy 316px",
+      "div.css-view-g5y9jx.r-alignItems-1awozwy 316px",
+      "div.css-view-g5y9jx.r-alignItems-1awozwy 390px"
+     ],
+     "outlinedBoxes": 5,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 5,
+     "boxRadius": 20,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [],
+    "nav": null,
+    "fontsLoaded": [
+     "instrument sans"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "pageH": 844,
+    "margins": {
+     "left": 18,
+     "right": 18
+    },
+    "sections": [
+     {
+      "sel": "div.css-view-g5y9jx.r-backgroundColor-6uudwt",
+      "tag": "div",
+      "top": 72,
+      "height": 268,
+      "words": 31,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Hi Chisom",
+       "size": 30,
+       "tag": "h1"
+      },
+      "left": 39,
+      "right": 39,
+      "textLeft": 39,
+      "textRight": 61,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "div.css-view-g5y9jx.r-gap-1ssbvtb",
+      "tag": "div",
+      "top": 364,
+      "height": 371,
+      "words": 47,
+      "media": 0,
+      "middle": 0,
+      "heading": null,
+      "left": 18,
+      "right": 18,
+      "textLeft": 18,
+      "textRight": 18,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "div.css-view-g5y9jx.r-gap-1ssbvtb",
+      "tag": "div",
+      "top": 759,
+      "height": 354,
+      "words": 6,
+      "media": 0,
+      "middle": 142,
+      "heading": null,
+      "left": 18,
+      "right": 18,
+      "textLeft": 18,
+      "textRight": 18,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Hi Chisom",
+      "size": 30,
+      "top": 124,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 39,
+      "n": 1
+     }
+    ],
+    "leftBlocks": 1,
+    "bodySize": 14,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "dark": false,
+    "ground": "#eae2fc",
+    "sidebar": null,
+    "topbar": {
+     "h": 56
+    },
+    "canvas": {
+     "left": 18,
+     "right": 18
+    },
+    "hero": {
+     "text": "Hi Chisom",
+     "words": 2,
+     "chars": 9,
+     "lines": 1,
+     "size": 30,
+     "vw": 7.7,
+     "font": "Instrument Sans",
+     "weight": 700,
+     "tracking": -0.02,
+     "leading": 1.2,
+     "top": 124,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 0,
+    "layout": {
+     "panels": 4,
+     "firstScreen": 3,
+     "ragged": [],
+     "voids": []
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 6,
+     "radii": [
+      [
+       20,
+       3
+      ],
+      [
+       24,
+       1
+      ],
+      [
+       16,
+       1
+      ],
+      [
+       14,
+       1
+      ]
+     ],
+     "heavyBorders": 0,
+     "borderSamples": [],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 0
+    },
+    "chips": {
+     "count": 2,
+     "hues": 1,
+     "samples": [
+      {
+       "hue": 258,
+       "size": 30,
+       "radius": "15px"
+      },
+      {
+       "hue": 258,
+       "size": 30,
+       "radius": "15px"
+      }
+     ]
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 0,
+     "tabularShare": null,
+     "kpiMax": null
+    },
+    "rows": null,
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.26,
+     "tiny": 0,
+     "tinySamples": [],
+     "sizes": [
+      12,
+      13,
+      14,
+      16,
+      17,
+      18,
+      20,
+      30
+     ]
+    },
+    "title": {
+     "text": "Hi Chisom",
+     "size": 30,
+     "top": 124
+    },
+    "colourShare": 0.027
+   },
+   "consoleErrors": []
+  }
+ ],
+ "findings": [
+  {
+   "level": "WARN",
+   "id": "hero-void",
+   "width": 1440,
+   "message": "29% of the first screen is one empty block (480×780px at 0,120).",
+   "fix": "Place the void on purpose or fill it: move the picture, the film or one fact into it, grow the headline to meet it, or shrink the screen to its content. A void reads as placed only when something closes it on the far side and it is the screen's one rest."
+  },
+  {
+   "level": "WARN",
+   "id": "app-title-size",
+   "width": 390,
+   "message": "The h1 is 30px (\"Hi Chisom\").",
+   "fix": "An app screen is not a landing page: the title is 18-32px (20-24px on a phone)."
+  }
+ ],
+ "images": [
+  {
+   "viewport": "desktop",
+   "width": 1440,
+   "fold": "c:\\Users\\PC\\Documents\\Artrat\\.taste-skill\\inspect-after\\desktop-fold.jpg",
+   "pages": [
+    "c:\\Users\\PC\\Documents\\Artrat\\.taste-skill\\inspect-after\\desktop-page-01.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "tablet",
+   "width": 768,
+   "fold": "c:\\Users\\PC\\Documents\\Artrat\\.taste-skill\\inspect-after\\tablet-fold.jpg",
+   "pages": [
+    "c:\\Users\\PC\\Documents\\Artrat\\.taste-skill\\inspect-after\\tablet-page-01.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "mobile",
+   "width": 390,
+   "fold": "c:\\Users\\PC\\Documents\\Artrat\\.taste-skill\\inspect-after\\mobile-fold.jpg",
+   "pages": [
+    "c:\\Users\\PC\\Documents\\Artrat\\.taste-skill\\inspect-after\\mobile-page-01.jpg"
+   ],
+   "film": []
+  }
+ ]
+}

@@ -1,0 +1,1876 @@
+{
+ "url": "http://localhost:8081",
+ "at": "2026-10-29T09:50:52.434Z",
+ "allow": [],
+ "viewports": [
+  {
+   "width": 1440,
+   "height": 900,
+   "load": "load",
+   "screens": 1,
+   "filled": [
+    0.86
+   ],
+   "motion": {
+    "elements": 0,
+    "css": 0,
+    "transitions": 0,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "page": {
+     "height": 900,
+     "screens": 1,
+     "words": 232,
+     "img": 0,
+     "video": 0,
+     "canvas": 1,
+     "svg": 16,
+     "sections": 0,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Morning, Chisom.",
+     "words": 2,
+     "chars": 16,
+     "lines": 1,
+     "size": 40,
+     "vw": 2.8,
+     "font": "-apple-system",
+     "weight": 600,
+     "tracking": -0.02,
+     "leading": 1.15,
+     "top": 83,
+     "tag": "div",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": null,
+    "headings": [
+     {
+      "text": "Morning, Chisom.",
+      "words": 2,
+      "chars": 16,
+      "lines": 1,
+      "size": 40,
+      "vw": 2.8,
+      "font": "-apple-system",
+      "weight": 600,
+      "tracking": -0.02,
+      "leading": 1.15,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.55,
+      "top": 83,
+      "tag": "div",
+      "kind": "heading"
+     },
+     {
+      "text": "2",
+      "words": 1,
+      "chars": 1,
+      "lines": 1,
+      "size": 30,
+      "vw": 2.1,
+      "font": "-apple-system",
+      "weight": 400,
+      "tracking": 0,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.15,
+      "top": 395,
+      "tag": "div",
+      "kind": "heading"
+     },
+     {
+      "text": "1",
+      "words": 1,
+      "chars": 1,
+      "lines": 1,
+      "size": 30,
+      "vw": 2.1,
+      "font": "-apple-system",
+      "weight": 400,
+      "tracking": 0,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.15,
+      "top": 395,
+      "tag": "div",
+      "kind": "heading"
+     },
+     {
+      "text": "₦850,000",
+      "words": 1,
+      "chars": 8,
+      "lines": 1,
+      "size": 30,
+      "vw": 2.1,
+      "font": "-apple-system",
+      "weight": 400,
+      "tracking": 0,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.15,
+      "top": 395,
+      "tag": "div",
+      "kind": "heading"
+     },
+     {
+      "text": "6 / 6",
+      "words": 3,
+      "chars": 5,
+      "lines": 1,
+      "size": 30,
+      "vw": 2.1,
+      "font": "-apple-system",
+      "weight": 400,
+      "tracking": 0,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.15,
+      "top": 395,
+      "tag": "div",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 5,
+     "maxLines": 1,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": 1,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "-apple-system",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      30,
+      40
+     ],
+     "sizeCount": 8,
+     "notLoaded": [],
+     "body": {
+      "font": "-apple-system",
+      "size": 12,
+      "leading": 1.2,
+      "weight": 400,
+      "tracking": 0,
+      "contrast": 5.2
+     },
+     "measureChars": 88,
+     "max": {
+      "size": 40,
+      "vw": 2.8,
+      "font": "-apple-system",
+      "text": "Morning, Chisom."
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0.02,
+     "centerShare": 0,
+     "smallText": 18
+    },
+    "eyebrows": [
+     {
+      "text": "Wednesday, 29 October · First Semester 200L",
+      "above": "Morning, Chisom.",
+      "upper": false,
+      "tracked": false,
+      "mono": false,
+      "pill": false,
+      "size": 13,
+      "top": 60
+     },
+     {
+      "text": "Ready to submit",
+      "above": "2",
+      "upper": false,
+      "tracked": false,
+      "mono": false,
+      "pill": false,
+      "size": 13,
+      "top": 372
+     },
+     {
+      "text": "Needs your action",
+      "above": "1",
+      "upper": false,
+      "tracked": false,
+      "mono": false,
+      "pill": false,
+      "size": 13,
+      "top": 372
+     },
+     {
+      "text": "Potential annual value",
+      "above": "₦850,000",
+      "upper": false,
+      "tracked": false,
+      "mono": false,
+      "pill": false,
+      "size": 13,
+      "top": 372
+     },
+     {
+      "text": "Vault documents",
+      "above": "6 / 6",
+      "upper": false,
+      "tracked": false,
+      "mono": false,
+      "pill": false,
+      "size": 13,
+      "top": 372
+     }
+    ],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#ffffff",
+     "bodyBgHsl": {
+      "h": 0,
+      "s": 0,
+      "l": 1
+     },
+     "dark": false,
+     "sectionBgs": [
+      {
+       "color": "#f8f7fc",
+       "top": 0,
+       "hsl": {
+        "h": 252,
+        "s": 0.45,
+        "l": 0.98
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#6e6a7c",
+       "share": 0.33
+      },
+      {
+       "color": "#524d63",
+       "share": 0.25
+      },
+      {
+       "color": "#171426",
+       "share": 0.18
+      },
+      {
+       "color": "#5b21b6",
+       "share": 0.05
+      },
+      {
+       "color": "#5e5870",
+       "share": 0.05
+      }
+     ],
+     "button": {
+      "bg": "#f3f0fa",
+      "hsl": {
+       "h": 258,
+       "s": 0.5,
+       "l": 0.96
+      },
+      "fg": "#000000"
+     },
+     "lowContrast": [
+      {
+       "text": "Tap Artrat · 3D Model",
+       "ratio": 2.9,
+       "need": 4.5,
+       "size": 11,
+       "fg": "#8e889e",
+       "bg": "#f1ecf9"
+      },
+      {
+       "text": "Activity",
+       "ratio": 3.2,
+       "need": 4.5,
+       "size": 12,
+       "fg": "#8e889e",
+       "bg": "#f8f7fc"
+      },
+      {
+       "text": "Try dropping a link:",
+       "ratio": 3.4,
+       "need": 4.5,
+       "size": 12,
+       "fg": "#8e889e",
+       "bg": "#ffffff"
+      }
+     ]
+    },
+    "buttons": {
+     "count": 2,
+     "inHero": 2,
+     "radius": 8,
+     "height": 30,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "History (5)",
+      "Send"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 3,
+     "hairlineSamples": [
+      "div.css-view-g5y9jx.r-backgroundColor-zm3mb4 240px",
+      "div.css-view-g5y9jx.r-alignItems-1awozwy 774px",
+      "div.css-view-g5y9jx.r-borderTopColor-1ky1um8 440px"
+     ],
+     "outlinedBoxes": 11,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 11,
+     "boxRadius": 12,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": [
+      {
+       "count": 4,
+       "iconTopped": false,
+       "rounded": true,
+       "top": 355
+      }
+     ]
+    },
+    "heroMedia": [],
+    "nav": null,
+    "fontsLoaded": []
+   },
+   "layout": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "pageH": 900,
+    "margins": {
+     "left": 29,
+     "right": 104
+    },
+    "sections": [
+     {
+      "sel": "div.css-view-g5y9jx.r-alignItems-1awozwy",
+      "tag": "div",
+      "top": 40,
+      "height": 283,
+      "words": 61,
+      "media": 1,
+      "middle": 77,
+      "heading": {
+       "text": "Morning, Chisom.",
+       "size": 40,
+       "tag": "div"
+      },
+      "left": 316,
+      "right": 104,
+      "textLeft": 316,
+      "textRight": 134,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "div.css-view-g5y9jx.r-alignItems-1oszu61",
+      "tag": "div",
+      "top": 498,
+      "height": 300,
+      "words": 109,
+      "media": 0,
+      "middle": 58,
+      "heading": null,
+      "left": 337,
+      "right": 97,
+      "textLeft": 337,
+      "textRight": 97,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [],
+    "edgeText": [],
+    "edges": [],
+    "leftBlocks": 0,
+    "bodySize": 15,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0.13,
+    "voidBox": {
+     "x": 0,
+     "y": 300,
+     "w": 300,
+     "h": 540
+    }
+   },
+   "app": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "dark": false,
+    "ground": "#ffffff",
+    "sidebar": null,
+    "topbar": null,
+    "canvas": {
+     "left": 24,
+     "right": 104
+    },
+    "hero": {
+     "text": "Morning, Chisom.",
+     "words": 2,
+     "chars": 16,
+     "lines": 1,
+     "size": 40,
+     "vw": 2.8,
+     "font": "-apple-system",
+     "weight": 600,
+     "tracking": -0.02,
+     "leading": 1.15,
+     "top": 83,
+     "tag": "div",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 0,
+    "layout": {
+     "panels": 8,
+     "firstScreen": 8,
+     "ragged": [],
+     "voids": []
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 12,
+     "radii": [
+      [
+       12,
+       5
+      ],
+      [
+       10,
+       3
+      ],
+      [
+       14,
+       2
+      ],
+      [
+       16,
+       1
+      ],
+      [
+       0,
+       1
+      ]
+     ],
+     "heavyBorders": 0,
+     "borderSamples": [],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 0
+    },
+    "chips": {
+     "count": 0,
+     "hues": 0,
+     "samples": []
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 0,
+     "tabularShare": null,
+     "kpiMax": null
+    },
+    "rows": null,
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.44,
+     "tiny": 0,
+     "tinySamples": [],
+     "sizes": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      30,
+      40
+     ]
+    },
+    "title": null,
+    "colourShare": 0.003
+   },
+   "consoleErrors": []
+  },
+  {
+   "width": 768,
+   "height": 1024,
+   "load": "load",
+   "screens": 1,
+   "filled": [
+    0.81
+   ],
+   "motion": {
+    "elements": 0,
+    "css": 0,
+    "transitions": 0,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "page": {
+     "height": 1024,
+     "screens": 1,
+     "words": 214,
+     "img": 0,
+     "video": 0,
+     "canvas": 1,
+     "svg": 16,
+     "sections": 0,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "₦850,000",
+     "words": 1,
+     "chars": 8,
+     "lines": 1,
+     "size": 30,
+     "vw": 3.9,
+     "font": "-apple-system",
+     "weight": 400,
+     "tracking": 0,
+     "leading": 1.2,
+     "top": 809,
+     "tag": "div",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": null,
+    "headings": [
+     {
+      "text": "Morning, Chisom.",
+      "words": 2,
+      "chars": 16,
+      "lines": 1,
+      "size": 28,
+      "vw": 3.6,
+      "font": "-apple-system",
+      "weight": 600,
+      "tracking": -0.029,
+      "leading": 1.21,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.96,
+      "top": 398,
+      "tag": "div",
+      "kind": "heading"
+     },
+     {
+      "text": "2",
+      "words": 1,
+      "chars": 1,
+      "lines": 1,
+      "size": 30,
+      "vw": 3.9,
+      "font": "-apple-system",
+      "weight": 400,
+      "tracking": 0,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.43,
+      "top": 678,
+      "tag": "div",
+      "kind": "heading"
+     },
+     {
+      "text": "1",
+      "words": 1,
+      "chars": 1,
+      "lines": 1,
+      "size": 30,
+      "vw": 3.9,
+      "font": "-apple-system",
+      "weight": 400,
+      "tracking": 0,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.43,
+      "top": 678,
+      "tag": "div",
+      "kind": "heading"
+     },
+     {
+      "text": "₦850,000",
+      "words": 1,
+      "chars": 8,
+      "lines": 1,
+      "size": 30,
+      "vw": 3.9,
+      "font": "-apple-system",
+      "weight": 400,
+      "tracking": 0,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.43,
+      "top": 809,
+      "tag": "div",
+      "kind": "heading"
+     },
+     {
+      "text": "6 / 6",
+      "words": 3,
+      "chars": 5,
+      "lines": 1,
+      "size": 30,
+      "vw": 3.9,
+      "font": "-apple-system",
+      "weight": 400,
+      "tracking": 0,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.43,
+      "top": 809,
+      "tag": "div",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 5,
+     "maxLines": 1,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": 1,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "-apple-system",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      28,
+      30
+     ],
+     "sizeCount": 8,
+     "notLoaded": [],
+     "body": {
+      "font": "-apple-system",
+      "size": 12,
+      "leading": 1.2,
+      "weight": 400,
+      "tracking": 0,
+      "contrast": 5.2
+     },
+     "measureChars": 88,
+     "max": {
+      "size": 30,
+      "vw": 3.9,
+      "font": "-apple-system",
+      "text": "2"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0,
+     "centerShare": 0,
+     "smallText": 17
+    },
+    "eyebrows": [
+     {
+      "text": "Wednesday, 29 October · First Semester 200L",
+      "above": "Morning, Chisom.",
+      "upper": false,
+      "tracked": false,
+      "mono": false,
+      "pill": false,
+      "size": 13,
+      "top": 375
+     },
+     {
+      "text": "Ready to submit",
+      "above": "2",
+      "upper": false,
+      "tracked": false,
+      "mono": false,
+      "pill": false,
+      "size": 13,
+      "top": 655
+     },
+     {
+      "text": "Needs your action",
+      "above": "1",
+      "upper": false,
+      "tracked": false,
+      "mono": false,
+      "pill": false,
+      "size": 13,
+      "top": 655
+     },
+     {
+      "text": "Potential annual value",
+      "above": "₦850,000",
+      "upper": false,
+      "tracked": false,
+      "mono": false,
+      "pill": false,
+      "size": 13,
+      "top": 786
+     },
+     {
+      "text": "Vault documents",
+      "above": "6 / 6",
+      "upper": false,
+      "tracked": false,
+      "mono": false,
+      "pill": false,
+      "size": 13,
+      "top": 786
+     }
+    ],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#ffffff",
+     "bodyBgHsl": {
+      "h": 0,
+      "s": 0,
+      "l": 1
+     },
+     "dark": false,
+     "sectionBgs": [
+      {
+       "color": "#f8f7fc",
+       "top": 0,
+       "hsl": {
+        "h": 252,
+        "s": 0.45,
+        "l": 0.98
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#6e6a7c",
+       "share": 0.34
+      },
+      {
+       "color": "#524d63",
+       "share": 0.23
+      },
+      {
+       "color": "#171426",
+       "share": 0.18
+      },
+      {
+       "color": "#5b21b6",
+       "share": 0.06
+      },
+      {
+       "color": "#5e5870",
+       "share": 0.06
+      }
+     ],
+     "button": {
+      "bg": "#f3f0fa",
+      "hsl": {
+       "h": 258,
+       "s": 0.5,
+       "l": 0.96
+      },
+      "fg": "#000000"
+     },
+     "lowContrast": [
+      {
+       "text": "Tap Artrat · 3D Model",
+       "ratio": 2.9,
+       "need": 4.5,
+       "size": 11,
+       "fg": "#8e889e",
+       "bg": "#f1ecf9"
+      },
+      {
+       "text": "Try dropping a link:",
+       "ratio": 3.4,
+       "need": 4.5,
+       "size": 12,
+       "fg": "#8e889e",
+       "bg": "#ffffff"
+      }
+     ]
+    },
+    "buttons": {
+     "count": 2,
+     "inHero": 2,
+     "radius": 8,
+     "height": 30,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "History (5)",
+      "Send"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 4,
+     "hairlineSamples": [
+      "div.css-view-g5y9jx.r-alignItems-1awozwy 768px",
+      "div.css-view-g5y9jx.r-alignItems-1awozwy 714px",
+      "div.css-view-g5y9jx.r-borderTopColor-1ky1um8 660px",
+      "div.css-view-g5y9jx.r-alignItems-1awozwy 768px"
+     ],
+     "outlinedBoxes": 9,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 9,
+     "boxRadius": 12,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": [
+      {
+       "count": 4,
+       "iconTopped": false,
+       "rounded": true,
+       "top": 638
+      }
+     ]
+    },
+    "heroMedia": [],
+    "nav": null,
+    "fontsLoaded": []
+   },
+   "layout": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "pageH": 1024,
+    "margins": {
+     "left": 16,
+     "right": 33
+    },
+    "sections": [
+     {
+      "sel": "div.css-view-g5y9jx.r-justifyContent-1wtj0ep",
+      "tag": "div",
+      "top": 72,
+      "height": 534,
+      "words": 61,
+      "media": 1,
+      "middle": 1,
+      "heading": {
+       "text": "Morning, Chisom.",
+       "size": 28,
+       "tag": "div"
+      },
+      "left": 16,
+      "right": 33,
+      "textLeft": 16,
+      "textRight": 47,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "div.css-view-g5y9jx.r-flexDirection-18u37iz",
+      "tag": "div",
+      "top": 638,
+      "height": 250,
+      "words": 28,
+      "media": 0,
+      "middle": 237,
+      "heading": {
+       "text": "₦850,000",
+       "size": 30,
+       "tag": "div"
+      },
+      "left": 33,
+      "right": 216,
+      "textLeft": 33,
+      "textRight": 216,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "div.css-view-g5y9jx.r-alignItems-1oszu61",
+      "tag": "div",
+      "top": 912,
+      "height": 520,
+      "words": 5,
+      "media": 0,
+      "middle": 520,
+      "heading": null,
+      "left": 37,
+      "right": 37,
+      "textLeft": 37,
+      "textRight": 37,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [],
+    "edgeText": [],
+    "edges": [],
+    "leftBlocks": 0,
+    "bodySize": 15,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "dark": false,
+    "ground": "#ffffff",
+    "sidebar": null,
+    "topbar": {
+     "h": 48
+    },
+    "canvas": {
+     "left": 16,
+     "right": 33
+    },
+    "hero": {
+     "text": "₦850,000",
+     "words": 1,
+     "chars": 8,
+     "lines": 1,
+     "size": 30,
+     "vw": 3.9,
+     "font": "-apple-system",
+     "weight": 400,
+     "tracking": 0,
+     "leading": 1.2,
+     "top": 809,
+     "tag": "div",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 0,
+    "layout": {
+     "panels": 8,
+     "firstScreen": 7,
+     "ragged": [],
+     "voids": []
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 10,
+     "radii": [
+      [
+       12,
+       5
+      ],
+      [
+       14,
+       2
+      ],
+      [
+       16,
+       1
+      ],
+      [
+       10,
+       1
+      ],
+      [
+       0,
+       1
+      ]
+     ],
+     "heavyBorders": 0,
+     "borderSamples": [],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 0
+    },
+    "chips": {
+     "count": 0,
+     "hues": 0,
+     "samples": []
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 0,
+     "tabularShare": null,
+     "kpiMax": null
+    },
+    "rows": null,
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.45,
+     "tiny": 0,
+     "tinySamples": [],
+     "sizes": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      28,
+      30
+     ]
+    },
+    "title": null,
+    "colourShare": 0.006
+   },
+   "consoleErrors": []
+  },
+  {
+   "width": 390,
+   "height": 844,
+   "load": "load",
+   "screens": 1,
+   "filled": [
+    0.73
+   ],
+   "motion": {
+    "elements": 0,
+    "css": 0,
+    "transitions": 0,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "page": {
+     "height": 844,
+     "screens": 1,
+     "words": 214,
+     "img": 0,
+     "video": 0,
+     "canvas": 1,
+     "svg": 16,
+     "sections": 0,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Morning, Chisom.",
+     "words": 2,
+     "chars": 16,
+     "lines": 1,
+     "size": 28,
+     "vw": 7.2,
+     "font": "-apple-system",
+     "weight": 600,
+     "tracking": -0.03,
+     "leading": 1.21,
+     "top": 398,
+     "tag": "div",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": null,
+    "headings": [
+     {
+      "text": "Morning, Chisom.",
+      "words": 2,
+      "chars": 16,
+      "lines": 1,
+      "size": 28,
+      "vw": 7.2,
+      "font": "-apple-system",
+      "weight": 600,
+      "tracking": -0.029,
+      "leading": 1.21,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.92,
+      "top": 398,
+      "tag": "div",
+      "kind": "heading"
+     },
+     {
+      "text": "1",
+      "words": 1,
+      "chars": 1,
+      "lines": 1,
+      "size": 30,
+      "vw": 7.7,
+      "font": "-apple-system",
+      "weight": 400,
+      "tracking": 0,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.36,
+      "top": 730,
+      "tag": "div",
+      "kind": "heading"
+     },
+     {
+      "text": "2",
+      "words": 1,
+      "chars": 1,
+      "lines": 1,
+      "size": 30,
+      "vw": 7.7,
+      "font": "-apple-system",
+      "weight": 400,
+      "tracking": 0,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.36,
+      "top": 738,
+      "tag": "div",
+      "kind": "heading"
+     },
+     {
+      "text": "₦850,000",
+      "words": 1,
+      "chars": 8,
+      "lines": 1,
+      "size": 30,
+      "vw": 7.7,
+      "font": "-apple-system",
+      "weight": 400,
+      "tracking": 0,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.36,
+      "top": 877,
+      "tag": "div",
+      "kind": "heading"
+     },
+     {
+      "text": "6 / 6",
+      "words": 3,
+      "chars": 5,
+      "lines": 1,
+      "size": 30,
+      "vw": 7.7,
+      "font": "-apple-system",
+      "weight": 400,
+      "tracking": 0,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.36,
+      "top": 877,
+      "tag": "div",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 5,
+     "maxLines": 1,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": 2,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "-apple-system",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      28,
+      30
+     ],
+     "sizeCount": 8,
+     "notLoaded": [],
+     "body": {
+      "font": "-apple-system",
+      "size": 12,
+      "leading": 1.2,
+      "weight": 400,
+      "tracking": 0,
+      "contrast": 5.2
+     },
+     "measureChars": 48,
+     "max": {
+      "size": 30,
+      "vw": 7.7,
+      "font": "-apple-system",
+      "text": "2"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0,
+     "centerShare": 0,
+     "smallText": 17
+    },
+    "eyebrows": [
+     {
+      "text": "Wednesday, 29 October · First Semester 200L",
+      "above": "Morning, Chisom.",
+      "upper": false,
+      "tracked": false,
+      "mono": false,
+      "pill": false,
+      "size": 13,
+      "top": 375
+     },
+     {
+      "text": "Needs your action",
+      "above": "1",
+      "upper": false,
+      "tracked": false,
+      "mono": false,
+      "pill": false,
+      "size": 13,
+      "top": 707
+     },
+     {
+      "text": "Ready to submit",
+      "above": "2",
+      "upper": false,
+      "tracked": false,
+      "mono": false,
+      "pill": false,
+      "size": 13,
+      "top": 707
+     },
+     {
+      "text": "Potential annual value",
+      "above": "₦850,000",
+      "upper": false,
+      "tracked": false,
+      "mono": false,
+      "pill": false,
+      "size": 13,
+      "top": 854
+     },
+     {
+      "text": "Vault documents",
+      "above": "6 / 6",
+      "upper": false,
+      "tracked": false,
+      "mono": false,
+      "pill": false,
+      "size": 13,
+      "top": 854
+     }
+    ],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#ffffff",
+     "bodyBgHsl": {
+      "h": 0,
+      "s": 0,
+      "l": 1
+     },
+     "dark": false,
+     "sectionBgs": [
+      {
+       "color": "#f8f7fc",
+       "top": 0,
+       "hsl": {
+        "h": 252,
+        "s": 0.45,
+        "l": 0.98
+       }
+      },
+      {
+       "color": "#f1eef8",
+       "top": 980,
+       "hsl": {
+        "h": 258,
+        "s": 0.42,
+        "l": 0.95
+       }
+      },
+      {
+       "color": "#ffffff",
+       "top": 1035,
+       "hsl": {
+        "h": 0,
+        "s": 0,
+        "l": 1
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#6e6a7c",
+       "share": 0.34
+      },
+      {
+       "color": "#524d63",
+       "share": 0.23
+      },
+      {
+       "color": "#171426",
+       "share": 0.18
+      },
+      {
+       "color": "#5b21b6",
+       "share": 0.06
+      },
+      {
+       "color": "#5e5870",
+       "share": 0.06
+      }
+     ],
+     "button": {
+      "bg": "#f3f0fa",
+      "hsl": {
+       "h": 258,
+       "s": 0.5,
+       "l": 0.96
+      },
+      "fg": "#000000"
+     },
+     "lowContrast": [
+      {
+       "text": "Tap Artrat · 3D Model",
+       "ratio": 2.9,
+       "need": 4.5,
+       "size": 11,
+       "fg": "#8e889e",
+       "bg": "#f1ecf9"
+      },
+      {
+       "text": "Try dropping a link:",
+       "ratio": 3.4,
+       "need": 4.5,
+       "size": 12,
+       "fg": "#8e889e",
+       "bg": "#ffffff"
+      }
+     ]
+    },
+    "buttons": {
+     "count": 2,
+     "inHero": 2,
+     "radius": 8,
+     "height": 30,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "History (5)",
+      "Send"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 4,
+     "hairlineSamples": [
+      "div.css-view-g5y9jx.r-alignItems-1awozwy 390px",
+      "div.css-view-g5y9jx.r-alignItems-1awozwy 336px",
+      "div.css-view-g5y9jx.r-borderTopColor-1ky1um8 282px",
+      "div.css-view-g5y9jx.r-alignItems-1awozwy 390px"
+     ],
+     "outlinedBoxes": 11,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 11,
+     "boxRadius": 12,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": [
+      {
+       "count": 4,
+       "iconTopped": false,
+       "rounded": true,
+       "top": 690
+      }
+     ]
+    },
+    "heroMedia": [
+     {
+      "type": "canvas",
+      "ratio": 0.08
+     }
+    ],
+    "nav": null,
+    "fontsLoaded": []
+   },
+   "layout": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "pageH": 844,
+    "margins": {
+     "left": 16,
+     "right": 0
+    },
+    "sections": [
+     {
+      "sel": "div.css-view-g5y9jx.r-justifyContent-1wtj0ep",
+      "tag": "div",
+      "top": 72,
+      "height": 586,
+      "words": 61,
+      "media": 1,
+      "middle": 0,
+      "heading": {
+       "text": "Morning, Chisom.",
+       "size": 28,
+       "tag": "div"
+      },
+      "left": 16,
+      "right": 0,
+      "textLeft": 16,
+      "textRight": 0,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "div.css-view-g5y9jx.r-flexDirection-18u37iz",
+      "tag": "div",
+      "top": 690,
+      "height": 266,
+      "words": 10,
+      "media": 0,
+      "middle": 89,
+      "heading": null,
+      "left": 33,
+      "right": 65,
+      "textLeft": 33,
+      "textRight": 65,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "div.css-view-g5y9jx.r-alignItems-1oszu61",
+      "tag": "div",
+      "top": 980,
+      "height": 732,
+      "words": 0,
+      "media": 0,
+      "middle": 0,
+      "heading": null,
+      "left": null,
+      "right": null,
+      "textLeft": null,
+      "textRight": null,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [],
+    "edgeText": [
+     {
+      "text": "Send",
+      "side": "right",
+      "px": 0
+     }
+    ],
+    "edges": [],
+    "leftBlocks": 0,
+    "bodySize": 15,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "dark": false,
+    "ground": "#ffffff",
+    "sidebar": null,
+    "topbar": {
+     "h": 48
+    },
+    "canvas": {
+     "left": 16,
+     "right": -10
+    },
+    "hero": {
+     "text": "Morning, Chisom.",
+     "words": 2,
+     "chars": 16,
+     "lines": 1,
+     "size": 28,
+     "vw": 7.2,
+     "font": "-apple-system",
+     "weight": 600,
+     "tracking": -0.03,
+     "leading": 1.21,
+     "top": 398,
+     "tag": "div",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 0,
+    "layout": {
+     "panels": 8,
+     "firstScreen": 4,
+     "ragged": [],
+     "voids": []
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 12,
+     "radii": [
+      [
+       12,
+       5
+      ],
+      [
+       10,
+       3
+      ],
+      [
+       14,
+       2
+      ],
+      [
+       16,
+       1
+      ],
+      [
+       0,
+       1
+      ]
+     ],
+     "heavyBorders": 0,
+     "borderSamples": [],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 0
+    },
+    "chips": {
+     "count": 0,
+     "hues": 0,
+     "samples": []
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 0,
+     "tabularShare": null,
+     "kpiMax": null
+    },
+    "rows": null,
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.45,
+     "tiny": 0,
+     "tinySamples": [],
+     "sizes": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      28,
+      30
+     ]
+    },
+    "title": null,
+    "colourShare": 0.009
+   },
+   "consoleErrors": []
+  }
+ ],
+ "findings": [
+  {
+   "level": "FAIL",
+   "id": "palette-purple",
+   "width": 1440,
+   "message": "Indigo / violet (text #5b21b6).",
+   "fix": "Use the accent from the drawn palette.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "WARN",
+   "id": "contrast",
+   "width": 1440,
+   "message": "Low-contrast text: \"Tap Artrat · 3D Model\" 2.9:1 needs 4.5:1; \"Activity\" 3.2:1 needs 4.5:1; \"Try dropping a link:\" 3.4:1 needs 4.5:1",
+   "fix": "Darken or lighten the text colour.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "FAIL",
+   "id": "font-not-dealt",
+   "width": 1440,
+   "message": "The sheet dealt Instrument Sans, but the page renders -apple-system.",
+   "fix": "Load the dealt face (the link on the sheet) and put it first in font-family. A build that falls back to a default face lands on the default look."
+  },
+  {
+   "level": "FAIL",
+   "id": "no-title",
+   "width": 1440,
+   "message": "The screen has no h1.",
+   "fix": "Name the screen in an h1 at the top of the canvas (18–28px): \"Overview\", \"Payouts\", the project's name.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "FAIL",
+   "id": "edge-text",
+   "width": 390,
+   "message": "1 text block(s) sit within 12px of the screen edge: \"Send\" (0px from the right)",
+   "fix": "Keep text inside the page margin (16–20px). Only display type deliberately bled past the edge may touch it."
+  }
+ ],
+ "images": [
+  {
+   "viewport": "desktop",
+   "width": 1440,
+   "fold": "c:\\Users\\PC\\Documents\\Artrat\\.taste-skill\\inspect\\desktop-fold.jpg",
+   "pages": [
+    "c:\\Users\\PC\\Documents\\Artrat\\.taste-skill\\inspect\\desktop-page-01.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "tablet",
+   "width": 768,
+   "fold": "c:\\Users\\PC\\Documents\\Artrat\\.taste-skill\\inspect\\tablet-fold.jpg",
+   "pages": [
+    "c:\\Users\\PC\\Documents\\Artrat\\.taste-skill\\inspect\\tablet-page-01.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "mobile",
+   "width": 390,
+   "fold": "c:\\Users\\PC\\Documents\\Artrat\\.taste-skill\\inspect\\mobile-fold.jpg",
+   "pages": [
+    "c:\\Users\\PC\\Documents\\Artrat\\.taste-skill\\inspect\\mobile-page-01.jpg"
+   ],
+   "film": []
+  }
+ ]
+}
