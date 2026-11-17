@@ -1,0 +1,71 @@
+# Reference deployment (ADR 0004): `docker compose --env-file .env up --build` from infra/.
+name: artrat
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: artrat
+      POSTGRES_DB: artrat
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in infra/.env}
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U artrat"]
+      interval: 5s
+      retries: 10
+    networks: [internal]
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address :9001
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?}
+    volumes: [objdata:/data]
+    networks: [internal]
+
+  searxng:
+    image: searxng/searxng:latest
+    environment:
+      SEARXNG_SECRET: ${SEARXNG_SECRET:?}
+    networks: [internal, egress]
+
+  migrate:
+    build: ../backend
+    command: ["artrat", "migrate"]
+    env_file: .env
+    depends_on:
+      postgres: { condition: service_healthy }
+    networks: [internal]
+
+  api:
+    build: ../backend
+    command: ["artrat", "api", "--port", "8000"]
+    env_file: .env
+    ports: ["8000:8000"]
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    networks: [internal]
+
+  agent:
+    build: ../backend
+    command: ["artrat", "agent", "run"]
+    env_file: .env
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    networks: [internal, egress]
+
+  browser:
+    build: ../browser
+    env_file: .env
+    # Reaches the public web only; it holds no database credentials and no student data.
+    networks: [internal, egress]
+
+networks:
+  internal:
+    internal: true
+  egress: {}
+
+volumes:
+  pgdata: {}
+  objdata: {}

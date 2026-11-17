@@ -3,7 +3,7 @@
 ## Source of truth
 - Read `README.md`, then the relevant file in `docs/`, before planning or coding. `docs/` overrides the root `.docx` files.
 - Use the vocabulary in `GLOSSARY.md`. Record hard-to-reverse decisions in `docs/adr/`.
-- Current phase: **P1 frontend prototype** (`docs/08-frontend-plan.md`). Do not start backend work until P1's exit gate passes.
+- Current phase: **P2 Catalogue & Discovery backend** (`docs/07-roadmap.md`, `docs/05-discovery-agent.md`). P1 frontend is closed. Retrieval uses Scrapling and browser-use (ADR 0007).
 
 When working on **Artrat**, judiciously select and activate the installed skills in `.agents/skills/` based on the current phase of work rather than loading unrelated skills at once:
 

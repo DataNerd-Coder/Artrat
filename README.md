@@ -4,7 +4,7 @@
 
 Artrat is an autonomous AI scholarship agent for students. It discovers and verifies scholarships across the web and social media, inspects target portals in a safe dry run before touching student documents, checks strict binary eligibility, prepares all writeups and documents in exact portal sequence, triggers persistent Google Tasks and Calendar reminders for any required human signatures (such as a referee, mentor, guarantor, or departmental endorsement), picks up verification OTPs autonomously via Gmail, and executes the submission end-to-end after one student approval: **Declare & Submit**.
 
-> Status: **Phase 0 complete; Phase 1 (Frontend Prototype in `apps/mobile`) active.**
+> Status: **Phases P0–P6 complete and verified end-to-end (`apps/mobile`, `backend/`, `browser/`, `contract/`, `infra/`).**
 
 ## Read in this order
 
@@ -32,6 +32,31 @@ Artrat is an autonomous AI scholarship agent for students. It discovers and veri
 4. **Zero fabricated facts:** Artrat never invents a student's grades, projects, family background, or experiences; every essay claim maps to the student's Evidence Ledger.
 5. **100% autonomous OTP pickup via Gmail:** Connected Gmail handles portal verification codes and official submission receipts automatically without asking the student to type OTPs manually.
 6. **One version-bound approval (`Declare & Submit`):** Bound to the exact package hash and declaration text reviewed by the student, with downloadable Submission Kits (`.DOCX` + `.PDF`) always available.
+
+## Running the backend (P2)
+
+Needs [uv](https://docs.astral.sh/uv/). No Docker is required for local work.
+
+```powershell
+cd backend
+uv sync                                   # installs Python 3.12 deps, incl. Scrapling (ADR 0007)
+uv run pytest                             # tests run against an embedded Postgres 16
+$env:ARTRAT_DATABASE_URL = (uv run python scripts/dev_db.py)   # persistent local Postgres
+uv run artrat migrate
+uv run artrat agent fetch https://www.chevening.org/scholarships/
+uv run artrat api                         # http://localhost:8000/docs
+```
+
+Browser worker (browser-use, ADR 0007), needed for `artrat agent fetch --render <url>`:
+
+```powershell
+cd browser
+uv sync
+$env:ARTRAT_BROWSER_EXECUTABLE = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+uv run artrat-browser                     # http://localhost:8090
+```
+
+Full stack with containers: `cd infra; cp .env.example .env; docker compose --env-file .env up --build`.
 
 ## Source material
 

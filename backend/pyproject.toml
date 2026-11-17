@@ -1,0 +1,94 @@
+[project]
+name = "artrat"
+version = "0.1.0"
+description = "Artrat backend: api and agent roles from one codebase"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.6",
+    "sqlalchemy>=2.0.36",
+    "psycopg[binary]>=3.2",
+    "alembic>=1.14",
+    "httpx>=0.27",
+    "pyyaml>=6.0",
+    # Fetch + parse for the discovery agent, installed from the owner's fork (read-only).
+    "scrapling[fetchers] @ git+https://github.com/DataNerd-Coder/Scrapling",
+]
+
+[project.scripts]
+artrat = "artrat.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pgserver>=0.1.4",
+    "ruff>=0.8",
+    "import-linter>=2.1",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["artrat"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.importlinter]
+root_package = "artrat"
+
+[[tool.importlinter.contracts]]
+name = "Catalogue never depends on research, student, submission, integrations, llm or api"
+type = "forbidden"
+source_modules = ["artrat.catalogue"]
+forbidden_modules = [
+    "artrat.research",
+    "artrat.student",
+    "artrat.submission",
+    "artrat.integrations",
+    "artrat.llm",
+    "artrat.api",
+]
+
+[[tool.importlinter.contracts]]
+name = "Research uses catalogue only through its public interface and never reads student data"
+type = "forbidden"
+source_modules = ["artrat.research"]
+forbidden_modules = [
+    "artrat.catalogue.tables",
+    "artrat.student",
+    "artrat.submission",
+    "artrat.api",
+]
+allow_indirect_imports = true
+
+[[tool.importlinter.contracts]]
+name = "Student uses catalogue only through its public interface and never depends on research or api"
+type = "forbidden"
+source_modules = ["artrat.student"]
+forbidden_modules = ["artrat.catalogue.tables", "artrat.research", "artrat.api"]
+allow_indirect_imports = true
+
+[[tool.importlinter.contracts]]
+name = "Submission never depends on research or api"
+type = "forbidden"
+source_modules = ["artrat.submission"]
+forbidden_modules = ["artrat.catalogue.tables", "artrat.research", "artrat.api"]
+allow_indirect_imports = true
+
+[[tool.importlinter.contracts]]
+name = "Model gateway never depends on api or student"
+type = "forbidden"
+source_modules = ["artrat.llm"]
+forbidden_modules = ["artrat.api", "artrat.student"]

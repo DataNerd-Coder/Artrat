@@ -1,0 +1,31 @@
+[project]
+name = "artrat-browser"
+version = "0.1.0"
+description = "Isolated browser worker: renders pages and inspects portals with browser-use"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    # Browser agent from the owner's fork (read-only). Kept in its own package and image because
+    # it pins many exact versions and must never share a process with student data.
+    "browser-use @ git+https://github.com/DataNerd-Coder/browser-use",
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+]
+
+[project.scripts]
+artrat-browser = "artrat_browser.app:main"
+
+[dependency-groups]
+dev = ["pytest>=8.3"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["artrat_browser"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

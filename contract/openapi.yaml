@@ -1,0 +1,2077 @@
+openapi: 3.1.0
+info:
+  title: Artrat API
+  version: 0.1.0
+paths:
+  /health:
+    get:
+      summary: Health
+      operationId: health_health_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+                title: Response Health Health Get
+  /v1/sources:
+    get:
+      summary: Sources
+      operationId: sources_v1_sources_get
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          default: 50
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SourceOut'
+                title: Response Sources V1 Sources Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/opportunities:
+    get:
+      summary: Opportunities
+      operationId: opportunities_v1_opportunities_get
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          default: 50
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OpportunityOut'
+                title: Response Opportunities V1 Opportunities Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/opportunities/{slug}:
+    get:
+      summary: Opportunity By Slug
+      operationId: opportunity_by_slug_v1_opportunities__slug__get
+      parameters:
+      - name: slug
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Slug
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpportunityOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/opportunities/{slug}/blueprint:
+    get:
+      summary: Opportunity Blueprint
+      operationId: opportunity_blueprint_v1_opportunities__slug__blueprint_get
+      parameters:
+      - name: slug
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Slug
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortalBlueprintOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/universities/semesters:
+    get:
+      summary: University Semesters
+      operationId: university_semesters_v1_universities_semesters_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/UniversitySemesterOut'
+                type: array
+                title: Response University Semesters V1 Universities Semesters Get
+  /v1/universities/{short_code}/semester:
+    get:
+      summary: University Semester By Code
+      operationId: university_semester_by_code_v1_universities__short_code__semester_get
+      parameters:
+      - name: short_code
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Short Code
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UniversitySemesterOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/universities/{short_code}/check-semester:
+    post:
+      summary: Queue University Semester Check
+      operationId: queue_university_semester_check_v1_universities__short_code__check_semester_post
+      parameters:
+      - name: short_code
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Short Code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SemesterCheckIn'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SemesterCheckOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/research/status:
+    get:
+      summary: Research Status
+      description: Frontier task counts by status, for operators.
+      operationId: research_status_v1_research_status_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: integer
+                type: object
+                title: Response Research Status V1 Research Status Get
+  /v1/research/directions:
+    get:
+      summary: Research Directions
+      description: Active Research Directions and their Thompson-sampling yield counters.
+      operationId: research_directions_v1_research_directions_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ResearchDirectionOut'
+                type: array
+                title: Response Research Directions V1 Research Directions Get
+  /v1/research/link-drop:
+    post:
+      summary: Link Drop
+      description: "Student link-drop enrichment (docs/05 \xA71.4): prioritize an\
+        \ uncaptured scholarship URL."
+      operationId: link_drop_v1_research_link_drop_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LinkDropIn'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LinkDropOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/students:
+    post:
+      summary: Upsert Student
+      operationId: upsert_student_v1_students_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudentIn'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/students/{student_id}:
+    get:
+      summary: Get Student By Id
+      operationId: get_student_by_id_v1_students__student_id__get
+      parameters:
+      - name: student_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Student Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/students/{student_id}/level-override:
+    post:
+      summary: Level Override
+      operationId: level_override_v1_students__student_id__level_override_post
+      parameters:
+      - name: student_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Student Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LevelOverrideIn'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/students/{student_id}/facts:
+    post:
+      summary: Upsert Student Fact
+      operationId: upsert_student_fact_v1_students__student_id__facts_post
+      parameters:
+      - name: student_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Student Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileFactIn'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileFactOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      summary: Student Facts
+      operationId: student_facts_v1_students__student_id__facts_get
+      parameters:
+      - name: student_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Student Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProfileFactOut'
+                title: Response Student Facts V1 Students  Student Id  Facts Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/students/{student_id}/vault:
+    post:
+      summary: Upload To Vault
+      operationId: upload_to_vault_v1_students__student_id__vault_post
+      parameters:
+      - name: student_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Student Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VaultUploadIn'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VaultDocumentOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      summary: Student Vault
+      operationId: student_vault_v1_students__student_id__vault_get
+      parameters:
+      - name: student_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Student Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VaultDocumentOut'
+                title: Response Student Vault V1 Students  Student Id  Vault Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/students/{student_id}/bank-statement/pull:
+    post:
+      summary: Pull Bank Statement
+      operationId: pull_bank_statement_v1_students__student_id__bank_statement_pull_post
+      parameters:
+      - name: student_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Student Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BankStatementPullIn'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VaultDocumentOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/students/{student_id}/evidence-ledger:
+    post:
+      summary: Create Ledger Entry
+      operationId: create_ledger_entry_v1_students__student_id__evidence_ledger_post
+      parameters:
+      - name: student_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Student Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EvidenceLedgerIn'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvidenceLedgerOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      summary: Get Ledger Entries
+      operationId: get_ledger_entries_v1_students__student_id__evidence_ledger_get
+      parameters:
+      - name: student_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Student Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EvidenceLedgerOut'
+                title: Response Get Ledger Entries V1 Students  Student Id  Evidence
+                  Ledger Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/students/{student_id}/applications/{opportunity_slug}/curate:
+    post:
+      summary: Curate Student Application
+      operationId: curate_student_application_v1_students__student_id__applications__opportunity_slug__curate_post
+      parameters:
+      - name: student_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Student Id
+      - name: opportunity_slug
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Opportunity Slug
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurationOutcome'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/students/{student_id}/applications:
+    get:
+      summary: Student Applications
+      operationId: student_applications_v1_students__student_id__applications_get
+      parameters:
+      - name: student_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Student Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ApplicationOut'
+                title: Response Student Applications V1 Students  Student Id  Applications
+                  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/students/{student_id}/tasks:
+    get:
+      summary: Student Tasks
+      operationId: student_tasks_v1_students__student_id__tasks_get
+      parameters:
+      - name: student_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Student Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StudentTaskOut'
+                title: Response Student Tasks V1 Students  Student Id  Tasks Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/tasks/{task_id}/google-tasks-webhook:
+    post:
+      summary: Google Tasks Completion Webhook
+      operationId: google_tasks_completion_webhook_v1_tasks__task_id__google_tasks_webhook_post
+      parameters:
+      - name: task_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Task Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentTaskOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/applications/{application_id}/package:
+    post:
+      summary: Build Application Package
+      operationId: build_application_package_v1_applications__application_id__package_post
+      parameters:
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Application Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PackageBuildIn'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackageOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      summary: Get Application Package
+      operationId: get_application_package_v1_applications__application_id__package_get
+      parameters:
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Application Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackageOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/applications/{application_id}/canvas-rewrite:
+    post:
+      summary: Canvas Rewrite
+      operationId: canvas_rewrite_v1_applications__application_id__canvas_rewrite_post
+      parameters:
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Application Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CanvasRewriteIn'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackageOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/applications/{application_id}/submission-kit/{fmt}:
+    get:
+      summary: Download Submission Kit
+      operationId: download_submission_kit_v1_applications__application_id__submission_kit__fmt__get
+      parameters:
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Application Id
+      - name: fmt
+        in: path
+        required: true
+        schema:
+          enum:
+          - docx
+          - pdf
+          type: string
+          title: Fmt
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/applications/{application_id}/declare-and-submit:
+    post:
+      summary: Declare And Submit Endpoint
+      operationId: declare_and_submit_endpoint_v1_applications__application_id__declare_and_submit_post
+      parameters:
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Application Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitRequestIn'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    ApplicationOut:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        student_id:
+          type: string
+          format: uuid
+          title: Student Id
+        opportunity_id:
+          type: string
+          format: uuid
+          title: Opportunity Id
+        opportunity_slug:
+          type: string
+          title: Opportunity Slug
+        status:
+          $ref: '#/components/schemas/ApplicationStatus'
+        ordered_items:
+          items:
+            additionalProperties: true
+            type: object
+          type: array
+          title: Ordered Items
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+      type: object
+      required:
+      - id
+      - student_id
+      - opportunity_id
+      - opportunity_slug
+      - status
+      - ordered_items
+      - updated_at
+      title: ApplicationOut
+    ApplicationStatus:
+      type: string
+      enum:
+      - portal_inspection_pending
+      - portal_mapped
+      - preparing
+      - waiting_for_requirements
+      - ready_for_review
+      - approved_for_execution
+      - executing
+      - verifying_submission
+      - submitted
+      - submission_kit_exported
+      title: ApplicationStatus
+    AuthStep:
+      type: string
+      enum:
+      - login
+      - oauth
+      - email_otp
+      - captcha
+      - mfa
+      title: AuthStep
+    AutomationPolicy:
+      type: string
+      enum:
+      - permitted
+      - explicitly_banned
+      title: AutomationPolicy
+    BankStatementPullIn:
+      properties:
+        provider:
+          type: string
+          title: Provider
+          default: mono
+        institution_name:
+          type: string
+          title: Institution Name
+          default: Access Bank
+        account_masked:
+          type: string
+          title: Account Masked
+          default: '****3410'
+        months:
+          type: integer
+          maximum: 24.0
+          minimum: 1.0
+          title: Months
+          default: 6
+      type: object
+      title: BankStatementPullIn
+    CanvasRewriteIn:
+      properties:
+        prompt_id:
+          type: string
+          minLength: 1
+          title: Prompt Id
+        instruction:
+          type: string
+          title: Instruction
+          default: Refine draft
+        replacement_text:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Replacement Text
+      type: object
+      required:
+      - prompt_id
+      title: CanvasRewriteIn
+    Claim_AutomationPolicy_:
+      properties:
+        value:
+          anyOf:
+          - $ref: '#/components/schemas/AutomationPolicy'
+          - type: 'null'
+        verification:
+          $ref: '#/components/schemas/Verification'
+        evidence:
+          items:
+            $ref: '#/components/schemas/EvidenceRef'
+          type: array
+          title: Evidence
+          default: []
+        last_verified_at:
+          type: string
+          format: date-time
+          title: Last Verified At
+      type: object
+      required:
+      - value
+      - verification
+      - last_verified_at
+      title: Claim[AutomationPolicy]
+    Claim_SemesterState_:
+      properties:
+        value:
+          anyOf:
+          - $ref: '#/components/schemas/SemesterState'
+          - type: 'null'
+        verification:
+          $ref: '#/components/schemas/Verification'
+        evidence:
+          items:
+            $ref: '#/components/schemas/EvidenceRef'
+          type: array
+          title: Evidence
+          default: []
+        last_verified_at:
+          type: string
+          format: date-time
+          title: Last Verified At
+      type: object
+      required:
+      - value
+      - verification
+      - last_verified_at
+      title: Claim[SemesterState]
+    Claim_str_:
+      properties:
+        value:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Value
+        verification:
+          $ref: '#/components/schemas/Verification'
+        evidence:
+          items:
+            $ref: '#/components/schemas/EvidenceRef'
+          type: array
+          title: Evidence
+          default: []
+        last_verified_at:
+          type: string
+          format: date-time
+          title: Last Verified At
+      type: object
+      required:
+      - value
+      - verification
+      - last_verified_at
+      title: Claim[str]
+    CurationOutcome:
+      properties:
+        eligible:
+          type: boolean
+          title: Eligible
+        failed_hard_rules:
+          items:
+            type: string
+          type: array
+          title: Failed Hard Rules
+        application:
+          anyOf:
+          - $ref: '#/components/schemas/ApplicationOut'
+          - type: 'null'
+      type: object
+      required:
+      - eligible
+      - failed_hard_rules
+      title: CurationOutcome
+    DocumentType:
+      type: string
+      enum:
+      - waec_result
+      - jamb_result
+      - school_admission_letter
+      - jamb_admission_letter
+      - school_id
+      - nin_slip
+      - passport_photo
+      - cv
+      - transcript
+      - lga_certificate
+      - bank_statement
+      - dynamic_endorsement
+      title: DocumentType
+    EvidenceLedgerIn:
+      properties:
+        category:
+          type: string
+          maxLength: 60
+          minLength: 2
+          title: Category
+        title:
+          type: string
+          minLength: 2
+          title: Title
+        fact_text:
+          type: string
+          minLength: 2
+          title: Fact Text
+        source_detail:
+          type: string
+          minLength: 2
+          title: Source Detail
+      type: object
+      required:
+      - category
+      - title
+      - fact_text
+      - source_detail
+      title: EvidenceLedgerIn
+    EvidenceLedgerOut:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        student_id:
+          type: string
+          format: uuid
+          title: Student Id
+        category:
+          type: string
+          title: Category
+        title:
+          type: string
+          title: Title
+        fact_text:
+          type: string
+          title: Fact Text
+        source_detail:
+          type: string
+          title: Source Detail
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+      type: object
+      required:
+      - id
+      - student_id
+      - category
+      - title
+      - fact_text
+      - source_detail
+      - created_at
+      title: EvidenceLedgerOut
+    EvidenceRef:
+      properties:
+        source_id:
+          type: string
+          title: Source Id
+        url:
+          type: string
+          maxLength: 2083
+          minLength: 1
+          format: uri
+          title: Url
+        passage:
+          type: string
+          minLength: 1
+          title: Passage
+        retrieved_at:
+          type: string
+          format: date-time
+          title: Retrieved At
+        locator:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Locator
+      type: object
+      required:
+      - source_id
+      - url
+      - passage
+      - retrieved_at
+      title: EvidenceRef
+    FactOrigin:
+      type: string
+      enum:
+      - self_reported
+      - document_extracted
+      - verified
+      title: FactOrigin
+    FetchMode:
+      type: string
+      enum:
+      - static
+      - rendered
+      title: FetchMode
+    GmailMsgIn:
+      properties:
+        message_id:
+          type: string
+          title: Message Id
+        sender_email:
+          type: string
+          title: Sender Email
+        subject:
+          type: string
+          title: Subject
+        body_text:
+          type: string
+          title: Body Text
+      type: object
+      required:
+      - message_id
+      - sender_email
+      - subject
+      - body_text
+      title: GmailMsgIn
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    LevelOverrideIn:
+      properties:
+        academic_level:
+          type: string
+          minLength: 3
+          title: Academic Level
+      type: object
+      required:
+      - academic_level
+      title: LevelOverrideIn
+    LinkDropIn:
+      properties:
+        url:
+          type: string
+          minLength: 1
+          title: Url
+      type: object
+      required:
+      - url
+      title: LinkDropIn
+    LinkDropOut:
+      properties:
+        queued:
+          type: boolean
+          title: Queued
+        canonical_url:
+          type: string
+          title: Canonical Url
+      type: object
+      required:
+      - queued
+      - canonical_url
+      title: LinkDropOut
+    OpportunityOut:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        slug:
+          type: string
+          title: Slug
+        cycle:
+          type: string
+          title: Cycle
+        status:
+          $ref: '#/components/schemas/OpportunityStatus'
+        claims:
+          additionalProperties: true
+          type: object
+          title: Claims
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+      type: object
+      required:
+      - id
+      - slug
+      - cycle
+      - status
+      - claims
+      - updated_at
+      title: OpportunityOut
+    OpportunityStatus:
+      type: string
+      enum:
+      - candidate
+      - verified
+      - upcoming
+      - open
+      - closed
+      - stale
+      - rejected
+      - withdrawn
+      title: OpportunityStatus
+    PackageBuildIn:
+      properties:
+        signer_role:
+          anyOf:
+          - $ref: '#/components/schemas/SignerRole'
+          - type: 'null'
+        recipient_address:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Recipient Address
+      type: object
+      title: PackageBuildIn
+    PackageOut:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        application_id:
+          type: string
+          format: uuid
+          title: Application Id
+        student_id:
+          type: string
+          format: uuid
+          title: Student Id
+        version:
+          type: integer
+          title: Version
+        package_hash:
+          type: string
+          title: Package Hash
+        ordered_items:
+          items:
+            additionalProperties: true
+            type: object
+          type: array
+          title: Ordered Items
+        endorsement_letter:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Endorsement Letter
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+      type: object
+      required:
+      - id
+      - application_id
+      - student_id
+      - version
+      - package_hash
+      - ordered_items
+      - endorsement_letter
+      - updated_at
+      title: PackageOut
+    PortalBlueprintOut:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        opportunity_id:
+          type: string
+          format: uuid
+          title: Opportunity Id
+        portal_url:
+          type: string
+          title: Portal Url
+        version:
+          type: integer
+          title: Version
+        fields:
+          items:
+            $ref: '#/components/schemas/PortalFieldSpec'
+          type: array
+          title: Fields
+        uploads:
+          items:
+            $ref: '#/components/schemas/PortalUploadSpec'
+          type: array
+          title: Uploads
+        essay_prompts:
+          items:
+            $ref: '#/components/schemas/PortalEssaySpec'
+          type: array
+          title: Essay Prompts
+        declarations:
+          items:
+            type: string
+          type: array
+          title: Declarations
+        auth_steps:
+          items:
+            $ref: '#/components/schemas/AuthStep'
+          type: array
+          title: Auth Steps
+        automation_policy:
+          $ref: '#/components/schemas/Claim_AutomationPolicy_'
+        inspected_at:
+          type: string
+          format: date-time
+          title: Inspected At
+      type: object
+      required:
+      - id
+      - opportunity_id
+      - portal_url
+      - version
+      - fields
+      - uploads
+      - essay_prompts
+      - declarations
+      - auth_steps
+      - automation_policy
+      - inspected_at
+      title: PortalBlueprintOut
+    PortalEssaySpec:
+      properties:
+        prompt_id:
+          type: string
+          minLength: 1
+          title: Prompt Id
+        prompt:
+          type: string
+          minLength: 1
+          title: Prompt
+        word_limit:
+          anyOf:
+          - type: integer
+            minimum: 1.0
+          - type: 'null'
+          title: Word Limit
+      type: object
+      required:
+      - prompt_id
+      - prompt
+      title: PortalEssaySpec
+    PortalFieldSpec:
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: Name
+        label:
+          type: string
+          minLength: 1
+          title: Label
+        field_type:
+          type: string
+          title: Field Type
+          default: text
+        required:
+          type: boolean
+          title: Required
+          default: true
+      type: object
+      required:
+      - name
+      - label
+      title: PortalFieldSpec
+    PortalUploadSpec:
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: Name
+        label:
+          type: string
+          minLength: 1
+          title: Label
+        doc_type:
+          $ref: '#/components/schemas/DocumentType'
+        formats:
+          items:
+            type: string
+          type: array
+          title: Formats
+          default:
+          - pdf
+        max_kb:
+          type: integer
+          minimum: 1.0
+          title: Max Kb
+          default: 2048
+        signed_by:
+          anyOf:
+          - $ref: '#/components/schemas/SignerRole'
+          - type: 'null'
+      type: object
+      required:
+      - name
+      - label
+      - doc_type
+      title: PortalUploadSpec
+    ProfileFactIn:
+      properties:
+        key:
+          type: string
+          maxLength: 80
+          minLength: 1
+          title: Key
+        label:
+          type: string
+          minLength: 1
+          title: Label
+        value:
+          type: string
+          minLength: 1
+          title: Value
+        origin:
+          $ref: '#/components/schemas/FactOrigin'
+          default: self_reported
+        source_detail:
+          type: string
+          minLength: 1
+          title: Source Detail
+        document_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Document Id
+      type: object
+      required:
+      - key
+      - label
+      - value
+      - source_detail
+      title: ProfileFactIn
+    ProfileFactOut:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        student_id:
+          type: string
+          format: uuid
+          title: Student Id
+        key:
+          type: string
+          title: Key
+        label:
+          type: string
+          title: Label
+        value:
+          type: string
+          title: Value
+        origin:
+          $ref: '#/components/schemas/FactOrigin'
+        source_detail:
+          type: string
+          title: Source Detail
+        document_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Document Id
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+      type: object
+      required:
+      - id
+      - student_id
+      - key
+      - label
+      - value
+      - origin
+      - source_detail
+      - document_id
+      - updated_at
+      title: ProfileFactOut
+    ResearchDirectionOut:
+      properties:
+        slug:
+          type: string
+          title: Slug
+        channel:
+          type: string
+          title: Channel
+        query:
+          type: string
+          title: Query
+        demand_weight:
+          type: number
+          title: Demand Weight
+        attempts:
+          type: integer
+          title: Attempts
+        leads_found:
+          type: integer
+          title: Leads Found
+        verified_opportunities:
+          type: integer
+          title: Verified Opportunities
+        expired_opportunities:
+          type: integer
+          title: Expired Opportunities
+        total_cost:
+          type: number
+          title: Total Cost
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+      type: object
+      required:
+      - slug
+      - channel
+      - query
+      - demand_weight
+      - attempts
+      - leads_found
+      - verified_opportunities
+      - expired_opportunities
+      - total_cost
+      - updated_at
+      title: ResearchDirectionOut
+    SemesterCheckIn:
+      properties:
+        university_name:
+          type: string
+          minLength: 2
+          title: University Name
+        url:
+          type: string
+          minLength: 1
+          title: Url
+      type: object
+      required:
+      - university_name
+      - url
+      title: SemesterCheckIn
+    SemesterCheckOut:
+      properties:
+        queued:
+          type: boolean
+          title: Queued
+        short_code:
+          type: string
+          title: Short Code
+        canonical_url:
+          type: string
+          title: Canonical Url
+      type: object
+      required:
+      - queued
+      - short_code
+      - canonical_url
+      title: SemesterCheckOut
+    SemesterState:
+      type: string
+      enum:
+      - 1st Semester
+      - 2nd Semester
+      - Session Break / Exam Processing
+      title: SemesterState
+    SignerRole:
+      type: string
+      enum:
+      - academic_referee
+      - mentor
+      - guarantor
+      - hod
+      - dean
+      - exam_officer
+      - employer
+      - community_leader
+      - clergy
+      - guardian
+      - other
+      title: SignerRole
+    SourceOut:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        url:
+          type: string
+          title: Url
+        final_url:
+          type: string
+          title: Final Url
+        status_code:
+          type: integer
+          title: Status Code
+        fetch_mode:
+          $ref: '#/components/schemas/FetchMode'
+        content_hash:
+          type: string
+          title: Content Hash
+        title:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Title
+        retrieved_at:
+          type: string
+          format: date-time
+          title: Retrieved At
+      type: object
+      required:
+      - id
+      - url
+      - final_url
+      - status_code
+      - fetch_mode
+      - content_hash
+      - title
+      - retrieved_at
+      title: SourceOut
+    StudentIn:
+      properties:
+        email:
+          type: string
+          maxLength: 255
+          minLength: 3
+          title: Email
+        full_name:
+          type: string
+          minLength: 2
+          title: Full Name
+        date_of_birth:
+          type: string
+          format: date
+          title: Date Of Birth
+        institution:
+          type: string
+          minLength: 2
+          title: Institution
+        department:
+          type: string
+          minLength: 2
+          title: Department
+        matric_number:
+          type: string
+          minLength: 2
+          title: Matric Number
+        academic_level:
+          type: string
+          title: Academic Level
+          default: 200 Level
+        autonomous_level_promotion:
+          type: boolean
+          title: Autonomous Level Promotion
+          default: true
+        state_of_origin:
+          type: string
+          minLength: 2
+          title: State Of Origin
+        lga:
+          type: string
+          minLength: 2
+          title: Lga
+        residential_address:
+          type: string
+          minLength: 2
+          title: Residential Address
+      type: object
+      required:
+      - email
+      - full_name
+      - date_of_birth
+      - institution
+      - department
+      - matric_number
+      - state_of_origin
+      - lga
+      - residential_address
+      title: StudentIn
+    StudentOut:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        email:
+          type: string
+          title: Email
+        full_name:
+          type: string
+          title: Full Name
+        date_of_birth:
+          type: string
+          format: date
+          title: Date Of Birth
+        is_minor:
+          type: boolean
+          title: Is Minor
+        institution:
+          type: string
+          title: Institution
+        department:
+          type: string
+          title: Department
+        matric_number:
+          type: string
+          title: Matric Number
+        academic_level:
+          type: string
+          title: Academic Level
+        autonomous_level_promotion:
+          type: boolean
+          title: Autonomous Level Promotion
+        state_of_origin:
+          type: string
+          title: State Of Origin
+        lga:
+          type: string
+          title: Lga
+        residential_address:
+          type: string
+          title: Residential Address
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+      type: object
+      required:
+      - id
+      - email
+      - full_name
+      - date_of_birth
+      - is_minor
+      - institution
+      - department
+      - matric_number
+      - academic_level
+      - autonomous_level_promotion
+      - state_of_origin
+      - lga
+      - residential_address
+      - updated_at
+      title: StudentOut
+    StudentTaskOut:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        student_id:
+          type: string
+          format: uuid
+          title: Student Id
+        application_id:
+          type: string
+          format: uuid
+          title: Application Id
+        checklist_item_key:
+          type: string
+          title: Checklist Item Key
+        title:
+          type: string
+          title: Title
+        doc_type:
+          $ref: '#/components/schemas/DocumentType'
+        signed_by:
+          anyOf:
+          - $ref: '#/components/schemas/SignerRole'
+          - type: 'null'
+        status:
+          $ref: '#/components/schemas/StudentTaskStatus'
+        manual_completion_allowed:
+          type: boolean
+          title: Manual Completion Allowed
+        google_task_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Google Task Id
+        google_calendar_event_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Google Calendar Event Id
+        sync_status:
+          type: string
+          title: Sync Status
+        interval_hours:
+          type: integer
+          title: Interval Hours
+        last_triggered_at:
+          type: string
+          format: date-time
+          title: Last Triggered At
+        next_trigger_at:
+          type: string
+          format: date-time
+          title: Next Trigger At
+      type: object
+      required:
+      - id
+      - student_id
+      - application_id
+      - checklist_item_key
+      - title
+      - doc_type
+      - signed_by
+      - status
+      - manual_completion_allowed
+      - google_task_id
+      - google_calendar_event_id
+      - sync_status
+      - interval_hours
+      - last_triggered_at
+      - next_trigger_at
+      title: StudentTaskOut
+    StudentTaskStatus:
+      type: string
+      enum:
+      - open
+      - satisfied
+      title: StudentTaskStatus
+    SubmissionOut:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        application_id:
+          type: string
+          format: uuid
+          title: Application Id
+        student_id:
+          type: string
+          format: uuid
+          title: Student Id
+        package_version:
+          type: integer
+          title: Package Version
+        package_hash:
+          type: string
+          title: Package Hash
+        idempotency_key:
+          type: string
+          title: Idempotency Key
+        status:
+          type: string
+          title: Status
+        portal_reference:
+          type: string
+          title: Portal Reference
+        otp_used:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Otp Used
+        receipt_vault_doc_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Receipt Vault Doc Id
+        attempts:
+          type: integer
+          title: Attempts
+        submitted_at:
+          type: string
+          format: date-time
+          title: Submitted At
+      type: object
+      required:
+      - id
+      - application_id
+      - student_id
+      - package_version
+      - package_hash
+      - idempotency_key
+      - status
+      - portal_reference
+      - otp_used
+      - receipt_vault_doc_id
+      - attempts
+      - submitted_at
+      title: SubmissionOut
+    SubmitRequestIn:
+      properties:
+        package_hash:
+          type: string
+          minLength: 8
+          title: Package Hash
+        declaration_text:
+          type: string
+          minLength: 5
+          title: Declaration Text
+        inbox:
+          items:
+            $ref: '#/components/schemas/GmailMsgIn'
+          type: array
+          title: Inbox
+      type: object
+      required:
+      - package_hash
+      - declaration_text
+      title: SubmitRequestIn
+    UniversitySemesterOut:
+      properties:
+        short_code:
+          type: string
+          title: Short Code
+        university_name:
+          type: string
+          title: University Name
+        current_session:
+          $ref: '#/components/schemas/Claim_str_'
+        current_semester:
+          $ref: '#/components/schemas/Claim_SemesterState_'
+        next_level_promotion_window:
+          type: string
+          title: Next Level Promotion Window
+        last_checked_at:
+          type: string
+          format: date-time
+          title: Last Checked At
+      type: object
+      required:
+      - short_code
+      - university_name
+      - current_session
+      - current_semester
+      - next_level_promotion_window
+      - last_checked_at
+      title: UniversitySemesterOut
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    VaultDocumentOut:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        student_id:
+          type: string
+          format: uuid
+          title: Student Id
+        doc_type:
+          $ref: '#/components/schemas/DocumentType'
+        signed_by:
+          anyOf:
+          - $ref: '#/components/schemas/SignerRole'
+          - type: 'null'
+        title:
+          type: string
+          title: Title
+        file_name:
+          type: string
+          title: File Name
+        storage_key:
+          type: string
+          title: Storage Key
+        extracted_summary:
+          type: string
+          title: Extracted Summary
+        uploaded_at:
+          type: string
+          format: date-time
+          title: Uploaded At
+      type: object
+      required:
+      - id
+      - student_id
+      - doc_type
+      - signed_by
+      - title
+      - file_name
+      - storage_key
+      - extracted_summary
+      - uploaded_at
+      title: VaultDocumentOut
+    VaultUploadIn:
+      properties:
+        doc_type:
+          $ref: '#/components/schemas/DocumentType'
+        signed_by:
+          anyOf:
+          - $ref: '#/components/schemas/SignerRole'
+          - type: 'null'
+        title:
+          type: string
+          minLength: 1
+          title: Title
+        file_name:
+          type: string
+          minLength: 1
+          title: File Name
+        storage_key:
+          type: string
+          minLength: 1
+          title: Storage Key
+        extracted_summary:
+          type: string
+          minLength: 1
+          title: Extracted Summary
+        extracted_facts:
+          items:
+            $ref: '#/components/schemas/ProfileFactIn'
+          type: array
+          title: Extracted Facts
+          default: []
+      type: object
+      required:
+      - doc_type
+      - title
+      - file_name
+      - storage_key
+      - extracted_summary
+      title: VaultUploadIn
+    Verification:
+      type: string
+      enum:
+      - official
+      - corroborated
+      - inferred
+      - unknown
+      - conflicting
+      title: Verification

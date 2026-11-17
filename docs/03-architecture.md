@@ -52,7 +52,8 @@ flowchart TB
 | API role | Python 3.12, FastAPI, Pydantic v2 | Auth, validation, ownership, Declare & Submit transaction, Submission Kit `.DOCX`/`.PDF` export, read models for the app | Run long jobs inline |
 | Agent role | Python, custom planner | Discovery loop over the research frontier (`05-discovery-agent.md`), dry-run Portal Inspector (`PortalBlueprint`), and Live University Semester Check (cached per school) | Read private student data |
 | Worker role | Python, job queue | Vision OCR extraction (Docling + Vision LLM), strict binary matching, Evidence-Ledger drafting, Google Tasks/Calendar trigger loop, autonomous Gmail OTP pickup & receipt archival, Mono/Okra bank statement pull | Write Catalogue rows (except the extraction pipeline acting for the agent) |
-| Browser worker | Playwright (Python), separate image | Rendering JS-heavy pages for discovery & dry-run Portal Blueprint mapping; isolated per-job cloud execution after `Declare & Submit` | Reach private networks; share sessions across students |
+| Static fetch | Scrapling (`DataNerd-Coder/Scrapling`, ADR 0007), inside the backend image | Fast HTTP fetch and HTML parsing for discovery; every redirect hop passes the public-URL guard | Reach private networks |
+| Browser worker | browser-use (`DataNerd-Coder/browser-use`, ADR 0007), separate image | Rendering JS-heavy pages for discovery & dry-run Portal Blueprint mapping; isolated per-job cloud execution after `Declare & Submit` | Reach private networks; share sessions across students |
 | Database | Postgres 16 + pgvector | Single source of truth (Catalogue, University Semester Cache, Student Profile Facts, Dynamic Vault, Applications); row-level security for student tables | Store raw tokens in plain text |
 | Job queue | Postgres-backed (Procrastinate or equivalent) | Durable jobs, retries, recurring Google Tasks trigger schedules | Become a second source of truth |
 | Object storage | S3-compatible (MinIO locally; S3, R2, or Azure Blob in cloud) | Dynamic Vault documents, Submission Kits, page snapshots | Serve public URLs for student documents |
@@ -65,7 +66,7 @@ flowchart TB
 backend image ──┬── artrat api        (HTTP)
                 ├── artrat agent      (discovery loop, dry-run portal inspector, university semester checker)
                 └── artrat worker -q  (vision_extract | matching | drafting | sync | execute | notify)
-browser image ──── artrat-browser     (Playwright pool behind an internal RPC)
+browser image ──── artrat-browser     (browser-use sessions behind an internal HTTP API: POST /render)
 ```
 
 One image keeps domain types in one place. Roles scale independently by replica count.
@@ -91,7 +92,7 @@ artrat/
 │   │   ├── llm/                # gateway, vision extraction prompts, output schemas
 │   │   └── platform/           # db, queue, storage, auth, audit
 │   └── tests/
-├── browser/                    # Playwright worker image
+├── browser/                    # browser-use worker image
 ├── contract/                   # OpenAPI spec, generated at backend start
 ├── infra/
 │   ├── docker-compose.yml

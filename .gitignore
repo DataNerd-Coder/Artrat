@@ -29,3 +29,13 @@ Thumbs.db
 
 # Agent scratch & local telemetry
 .gemini/
+
+# Python (backend/, browser/)
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.import_linter_cache/
+.pgdata/
+node_modules/
+.expo/
