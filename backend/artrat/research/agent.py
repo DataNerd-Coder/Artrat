@@ -26,7 +26,7 @@ from artrat.research.directions import (
 )
 from artrat.research.extract import Proposer, default_propose, extract_from_source
 from artrat.research.fetch import FetchFailed, Retrieved, fetch_rendered, fetch_static, http_get
-from artrat.research.links import canonical_url, follow_candidates
+from artrat.research.links import canonical_url, follow_candidates, resolve_dropped_link
 from artrat.research.portal import inspect_portal_snapshot
 from artrat.research.robots import RobotsCache
 from artrat.research.search import Searcher, searxng_search
@@ -78,16 +78,17 @@ def seed(rt: Runtime, urls: list[str]) -> int:
 
 
 def drop_link(rt: Runtime, url: str) -> bool:
-    """Student link-drop enrichment (docs/05 §1.4): high-priority immediate crawl."""
-    rt.guard(url)
+    """Student link-drop enrichment (docs/05 §1.4): high-priority immediate crawl.
+    Supports full URLs, bare domains ('icanstudent.com'), and extensionless names ('scholarshipregion')."""
+    resolved = resolve_dropped_link(url, guard=rt.guard)
     with session_scope() as session:
         return frontier.enqueue(
             session,
             TaskKind.FETCH,
-            url,
+            resolved,
             depth=0,
             priority=LINK_DROP_PRIORITY,
-            reason={"link_drop": True},
+            reason={"link_drop": True, "raw_input": url},
             settings=rt.settings,
         )
 

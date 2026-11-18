@@ -22,7 +22,7 @@ from artrat.platform.urls import BlockedUrl, assert_public_http_url
 from artrat.research import frontier
 from artrat.research.agent import LINK_DROP_PRIORITY
 from artrat.research.directions import ResearchDirectionOut, ensure_default_directions
-from artrat.research.links import canonical_url
+from artrat.research.links import canonical_url, resolve_dropped_link
 from artrat.research.tables import TaskKind
 from artrat.student import api as student
 from artrat.submission import api as submission
@@ -184,7 +184,7 @@ def research_directions(session: DbSession) -> list[ResearchDirectionOut]:
 def link_drop(body: LinkDropIn, session: DbSession) -> LinkDropOut:
     """Student link-drop enrichment (docs/05 §1.4): prioritize an uncaptured scholarship URL."""
     try:
-        checked = assert_public_http_url(body.url)
+        checked = resolve_dropped_link(body.url, guard=assert_public_http_url)
     except BlockedUrl as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     queued = frontier.enqueue(
@@ -193,7 +193,7 @@ def link_drop(body: LinkDropIn, session: DbSession) -> LinkDropOut:
         checked,
         depth=0,
         priority=LINK_DROP_PRIORITY,
-        reason={"link_drop": True},
+        reason={"link_drop": True, "raw_input": body.url},
         settings=get_settings(),
     )
     return LinkDropOut(queued=queued, canonical_url=canonical_url(checked))

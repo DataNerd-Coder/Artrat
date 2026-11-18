@@ -45,9 +45,21 @@ CYCLE_RE = re.compile(r"\b(20\d{2}\s*/\s*20\d{2}|20\d{2})\b")
 SCHOLARSHIP_HEADING_RE = re.compile(
     r"\b(scholarship|bursary|fellowship|grant|studentship|award)\b", re.IGNORECASE
 )
+DATE_TOKEN_PAT = (
+    r"(?:\d{1,2}(?:st|nd|rd|th)?\s+[A-Za-z]+\s+20\d{2}"
+    r"|[A-Za-z]+\s+\d{1,2}(?:st|nd|rd|th)?,?\s+20\d{2}"
+    r"|20\d{2}-\d{2}-\d{2})"
+)
 DEADLINE_RE = re.compile(
-    r"(?:deadline|closes?\s+on|closing\s+date|apply\s+before|submissions?\s+close(?:\s+on)?)"
-    r"[:\s]+(\d{1,2}\s+[A-Za-z]+\s+20\d{2}|20\d{2}-\d{2}-\d{2})",
+    r"(?:deadline|closes?\s+on|closing\s+date|apply\s+before|complete\s+your\s+application\s+by"
+    r"|submissions?\s+close(?:\s+on)?)"
+    rf"[:\s—–-]*({DATE_TOKEN_PAT})",
+    re.IGNORECASE,
+)
+STANDALONE_DATE_RE = re.compile(rf"\b({DATE_TOKEN_PAT})\b", re.IGNORECASE)
+DEADLINE_HEADING_RE = re.compile(
+    r"^(?:application\s+deadline|deadline(?:\s+stated\s+in\s+the\s+article)?|closing\s+date"
+    r"|important\s+dates?\s+and\s+deadline)\s*:?\s*$",
     re.IGNORECASE,
 )
 PORTAL_URL_RE = re.compile(
@@ -104,15 +116,24 @@ def _slugify(text: str) -> str:
 
 
 def _parse_date(raw: str) -> datetime | None:
-    raw = raw.strip()
+    raw = raw.strip().rstrip(".")
     if re.match(r"^20\d{2}-\d{2}-\d{2}$", raw):
         y, m, d = (int(x) for x in raw.split("-"))
         return datetime(y, m, d, 23, 59, tzinfo=UTC)
-    parts = raw.split()
-    if len(parts) == 3 and parts[0].isdigit() and parts[2].isdigit():
-        month = MONTHS.get(parts[1].lower())
-        if month:
-            return datetime(int(parts[2]), month, int(parts[0]), 23, 59, tzinfo=UTC)
+    cleaned = re.sub(r"(\d{1,2})(?:st|nd|rd|th)\b", r"\1", raw, flags=re.IGNORECASE)
+    cleaned = cleaned.replace(",", " ")
+    parts = cleaned.split()
+    if len(parts) == 3:
+        # Format 1: DD Month YYYY
+        if parts[0].isdigit() and parts[2].isdigit():
+            month = MONTHS.get(parts[1].lower())
+            if month and 1 <= int(parts[0]) <= 31:
+                return datetime(int(parts[2]), month, int(parts[0]), 23, 59, tzinfo=UTC)
+        # Format 2: Month DD YYYY
+        if parts[1].isdigit() and parts[2].isdigit():
+            month = MONTHS.get(parts[0].lower())
+            if month and 1 <= int(parts[1]) <= 31:
+                return datetime(int(parts[2]), month, int(parts[1]), 23, 59, tzinfo=UTC)
     return None
 
 
@@ -237,7 +258,7 @@ def default_propose(source: SourceSnapshotOut, clean_text: str) -> list[Proposed
     if not lines:
         return []
 
-    heading_candidates = [ln for ln in lines[:10] if SCHOLARSHIP_HEADING_RE.search(ln)]
+    heading_candidates = [ln for ln in lines[:30] if SCHOLARSHIP_HEADING_RE.search(ln)]
     if not heading_candidates:
         return []
     heading_line = next(
@@ -250,18 +271,32 @@ def default_propose(source: SourceSnapshotOut, clean_text: str) -> list[Proposed
     app_url_val: str | None = None
     app_url_passage: str | None = None
 
-    for ln in lines:
+    for idx, ln in enumerate(lines):
         if deadline_val is None and (m := DEADLINE_RE.search(ln)):
             parsed = _parse_date(m.group(1))
             if parsed is not None:
                 deadline_val = parsed
                 deadline_passage = ln
+        if deadline_val is None and DEADLINE_HEADING_RE.match(ln):
+            for nxt in lines[idx + 1 : idx + 4]:
+                for dm in STANDALONE_DATE_RE.finditer(nxt):
+                    parsed = _parse_date(dm.group(1))
+                    if parsed is not None:
+                        deadline_val = parsed
+                        deadline_passage = nxt
+                        break
+                if deadline_val is not None:
+                    break
         if app_url_val is None and (m := PORTAL_URL_RE.search(ln)):
             raw_url = m.group(1).rstrip(".")
             if not raw_url.startswith(("http://", "https://")):
                 raw_url = f"https://{raw_url}"
             app_url_val = raw_url
             app_url_passage = ln
+
+    if app_url_val is None:
+        app_url_val = source.final_url
+        app_url_passage = heading_line
 
     if deadline_val is None and app_url_val is None:
         return []

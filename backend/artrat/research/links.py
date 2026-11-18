@@ -2,7 +2,10 @@
 
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
+from artrat.platform.urls import BlockedUrl, assert_public_http_url
 from artrat.research.fetch import Link
+
+CANDIDATE_TLDS = (".com", ".org", ".ng", ".com.ng", ".edu.ng", ".net")
 
 TRACKING_PARAMS = {"fbclid", "gclid", "mc_cid", "mc_eid", "igshid", "ref", "ref_src"}
 SKIP_EXTENSIONS = (
@@ -35,6 +38,28 @@ def site_of(url: str) -> str:
     """The politeness and page-cap unit: host without 'www.', plus a non-default port."""
     parts = urlsplit(canonical_url(url))
     return parts.netloc.removeprefix("www.")
+
+
+def resolve_dropped_link(raw: str, *, guard=assert_public_http_url) -> str:
+    """Resolve a student-dropped link, bare domain ('icanstudent.com'), or extensionless site
+    name ('scholarshipregion') into a verified public canonical URL."""
+    cleaned = raw.strip()
+    if not cleaned:
+        raise BlockedUrl("empty link-drop input")
+    if "://" in cleaned:
+        return canonical_url(guard(cleaned))
+    host_part = cleaned.split("/", 1)[0]
+    if "." in host_part:
+        return canonical_url(guard(f"https://{cleaned}"))
+    slug = host_part.lower().replace(" ", "")
+    for tld in CANDIDATE_TLDS:
+        for prefix in ("https://www.", "https://"):
+            candidate = f"{prefix}{slug}{tld}/"
+            try:
+                return canonical_url(guard(candidate))
+            except BlockedUrl:
+                continue
+    raise BlockedUrl(f"could not resolve extensionless site name {raw!r}")
 
 
 def funding_term(link: Link) -> str | None:

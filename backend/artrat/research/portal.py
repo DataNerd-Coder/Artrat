@@ -67,10 +67,48 @@ def inspect_portal_snapshot(
         if ban_line is None and AUTOMATION_BAN_RE.search(ln):
             ban_line = ln
 
-        if ("full name" in low or "applicant name" in low) and not any(
+        if ("full name" in low or "applicant name" in low or "personal" in low) and not any(
             f.name == "full_name" for f in fields
         ):
-            fields.append(PortalFieldSpec(name="full_name", label="Full Name"))
+            fields.append(PortalFieldSpec(name="full_name", label="Full Legal Name"))
+        if ("email" in low or "contact" in low) and not any(
+            f.name == "email" for f in fields
+        ):
+            fields.append(PortalFieldSpec(name="email", label="Email Address", field_type="email"))
+        if ("phone" in low or "whatsapp" in low) and not any(
+            f.name == "phone" for f in fields
+        ):
+            fields.append(PortalFieldSpec(name="phone", label="Phone Number", field_type="tel"))
+        if ("date of birth" in low or "age" in low) and not any(
+            f.name == "date_of_birth" for f in fields
+        ):
+            fields.append(
+                PortalFieldSpec(name="date_of_birth", label="Date of Birth", field_type="date")
+            )
+        if ("university" in low or "institution" in low) and not any(
+            f.name == "institution" for f in fields
+        ):
+            fields.append(
+                PortalFieldSpec(name="institution", label="University / Institution")
+            )
+        if ("course" in low or "department" in low or "discipline" in low) and not any(
+            f.name == "department" for f in fields
+        ):
+            fields.append(
+                PortalFieldSpec(name="department", label="Course of Study / Department")
+            )
+        if ("200 level" in low or "200-level" in low or "year of study" in low or "100 level" in low) and not any(
+            f.name == "academic_level" for f in fields
+        ):
+            fields.append(
+                PortalFieldSpec(name="academic_level", label="Current Academic Level")
+            )
+        if ("state of origin" in low or "local government" in low or "lga" in low) and not any(
+            f.name == "state_and_lga" for f in fields
+        ):
+            fields.append(
+                PortalFieldSpec(name="state_and_lga", label="State of Origin & LGA")
+            )
         if ("matric" in low or "registration number" in low) and not any(
             f.name == "matric_number" for f in fields
         ):
@@ -81,33 +119,53 @@ def inspect_portal_snapshot(
             )
 
         # Separate School Admission Letter vs JAMB Admission Letter (Non-negotiable #3)
-        if ("university admission letter" in low or "school admission letter" in low) and (
-            "jamb" not in low
-        ):
-            add_upload(
-                "school_admission_letter",
-                "University Admission Letter (From School)",
-                DocumentType.SCHOOL_ADMISSION_LETTER,
-            )
-        if "jamb admission letter" in low or "jamb caps" in low:
+        if "admission letter" in low:
+            if "jamb" in low and "university" not in low and "school" not in low:
+                add_upload(
+                    "jamb_admission_letter",
+                    "JAMB CAPS Official Admission Letter",
+                    DocumentType.JAMB_ADMISSION_LETTER,
+                )
+            elif "university or jamb" in low or "university/jamb" in low:
+                add_upload(
+                    "school_admission_letter",
+                    "University Admission Letter (From School)",
+                    DocumentType.SCHOOL_ADMISSION_LETTER,
+                )
+                add_upload(
+                    "jamb_admission_letter",
+                    "JAMB CAPS Official Admission Letter",
+                    DocumentType.JAMB_ADMISSION_LETTER,
+                )
+            else:
+                add_upload(
+                    "school_admission_letter",
+                    "University Admission Letter (From School)",
+                    DocumentType.SCHOOL_ADMISSION_LETTER,
+                )
+        if "jamb caps" in low:
             add_upload(
                 "jamb_admission_letter",
                 "JAMB CAPS Official Admission Letter",
                 DocumentType.JAMB_ADMISSION_LETTER,
             )
-        if "transcript" in low or "semester result" in low or "statement of result" in low:
+        if "transcript" in low or "semester result" in low or "statement of result" in low or "academic record" in low or "academic result" in low:
             add_upload("transcript", "Academic Transcript / Result Sheet", DocumentType.TRANSCRIPT)
-        if "student id" in low or "school id" in low or "departmental id" in low:
+        if "student id" in low or "school id" in low or "departmental id" in low or "id card" in low:
             add_upload("school_id", "School / Departmental ID Card", DocumentType.SCHOOL_ID)
         if "nin" in low or "national identification" in low:
             add_upload("nin_slip", "National Identification Number (NIN) Slip", DocumentType.NIN_SLIP)
-        if "passport photo" in low or "passport photograph" in low:
+        if "passport photo" in low or "passport photograph" in low or "passport-sized" in low:
             add_upload("passport_photo", "Passport Photograph", DocumentType.PASSPORT_PHOTO)
-        if "o'level" in low or "waec" in low or "neco" in low:
+        if "o'level" in low or "o’level" in low or "waec" in low or "neco" in low:
             add_upload("waec_result", "O'Level (WAEC/NECO) Result", DocumentType.WAEC_RESULT)
-        if "jamb result" in low or "utme result" in low:
+        if "jamb result" in low or "utme result" in low or "jamb and o'level" in low:
             add_upload("jamb_result", "JAMB UTME Result Slip", DocumentType.JAMB_RESULT)
-        if "lga" in low and ("certificate" in low or "origin" in low or "indigene" in low):
+        if "curriculum vitae" in low or "resume" in low or "(cv)" in low:
+            add_upload("cv", "Academic Curriculum Vitae (CV)", DocumentType.CV)
+        if ("lga" in low or "local government" in low or "indigene" in low) and (
+            "certificate" in low or "origin" in low or "identification" in low or "letter" in low
+        ):
             add_upload(
                 "lga_certificate", "LGA Certificate of Origin", DocumentType.LGA_CERTIFICATE
             )
@@ -118,11 +176,16 @@ def inspect_portal_snapshot(
             ("hod", SignerRole.HOD, "HOD Attestation / Endorsement Letter"),
             ("head of department", SignerRole.HOD, "HOD Attestation / Endorsement Letter"),
             ("academic referee", SignerRole.ACADEMIC_REFEREE, "Academic Referee Letter"),
+            ("referee", SignerRole.ACADEMIC_REFEREE, "Academic Referee / Reference Letter"),
+            ("supervisor", SignerRole.ACADEMIC_REFEREE, "Academic Supervisor Support Letter"),
+            ("traditional ruler", SignerRole.COMMUNITY_LEADER, "Traditional Ruler / Community Leader Attestation"),
             ("mentor", SignerRole.MENTOR, "Mentor Recommendation Letter"),
             ("guarantor", SignerRole.GUARANTOR, "Guarantor Endorsement Form"),
             ("clergy", SignerRole.CLERGY, "Clergy Attestation Letter"),
         ):
-            if phrase in low and any(w in low for w in ("letter", "endorsement", "reference", "attestation")):
+            if phrase in low and any(
+                w in low for w in ("letter", "endorsement", "reference", "attestation", "statement", "support")
+            ):
                 add_upload(
                     f"endorsement_{role.value}",
                     label,
@@ -131,7 +194,14 @@ def inspect_portal_snapshot(
                 )
                 break
 
-        if "personal statement" in low or "statement of purpose" in low or "essay prompt" in low:
+        if (
+            "personal statement" in low
+            or "statement of purpose" in low
+            or "statement of interest" in low
+            or "motivation letter" in low
+            or "two-minute video" in low
+            or "essay prompt" in low
+        ) and len(essays) < 3:
             m = WORD_LIMIT_RE.search(ln)
             limit = int(m.group(1)) if m else None
             essays.append(
