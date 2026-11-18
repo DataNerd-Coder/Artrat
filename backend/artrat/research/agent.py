@@ -20,12 +20,18 @@ from artrat.research import frontier
 from artrat.research.directions import (
     choose_directions,
     direction_yield_mean,
+    evolve_direction_from_discovery,
     record_direction_outcome,
     relevance_of_text,
     score_priority,
 )
 from artrat.research.extract import Proposer, default_propose, extract_from_source
 from artrat.research.fetch import FetchFailed, Retrieved, fetch_rendered, fetch_static, http_get
+from artrat.research.learning import (
+    is_learned_aggregator_url,
+    learn_from_crawl_outcome,
+    sync_learned_signals_from_db,
+)
 from artrat.research.links import canonical_url, follow_candidates, resolve_dropped_link
 from artrat.research.portal import inspect_portal_snapshot
 from artrat.research.robots import RobotsCache
@@ -58,7 +64,7 @@ PortalNavigator = Callable[..., dict]
 
 def _is_aggregator_url(url: str) -> bool:
     low = url.lower()
-    return any(h in low for h in AGGREGATOR_HOSTS)
+    return any(h in low for h in AGGREGATOR_HOSTS) or is_learned_aggregator_url(url)
 
 
 @dataclass
@@ -323,20 +329,26 @@ def _handle_inspect_portal(rt: Runtime, task: frontier.ClaimedTask) -> None:
         return
 
     got = _fetch_portal_page(rt, task.url)
+    initial_links = [(lnk.anchor, lnk.url) for lnk in got.links]
+    initial_url = got.snapshot.final_url
+    flagged_as_blog = _is_aggregator_url(initial_url)
+    chosen_hop_url: str | None = None
 
     # Step 1: If we started on an aggregator blog, use AI navigation + outbound links + search to
     # hop to the real official portal and DISCARD the blog snapshot text so dry-run requirements
     # come strictly from the official portal/form.
-    if _is_aggregator_url(got.snapshot.final_url):
+    if flagged_as_blog or rt.portal_navigator is not None:
         target_official_url: str | None = None
         search_query: str | None = None
-        if rt.portal_navigator is not None:
+        if rt.portal_navigator is not None and flagged_as_blog:
             try:
                 plan = rt.portal_navigator(
                     current_url=got.snapshot.final_url,
                     page_text=got.snapshot.text,
-                    links=[(lnk.anchor, lnk.url) for lnk in got.links],
+                    links=initial_links,
                 )
+                if plan.get("is_aggregator_blog"):
+                    flagged_as_blog = True
                 candidate = plan.get("target_url")
                 if isinstance(candidate, str) and candidate.startswith("http") and not _is_aggregator_url(candidate):
                     target_official_url = candidate
@@ -345,14 +357,14 @@ def _handle_inspect_portal(rt: Runtime, task: frontier.ClaimedTask) -> None:
                     search_query = q.strip()
             except RuntimeError as exc:
                 log.debug("portal navigator fallback: %s", exc)
-        if target_official_url is None:
+        if flagged_as_blog and target_official_url is None:
             for ln in got.snapshot.text.splitlines():
                 if ln.startswith("Apply at http"):
                     hop_url = ln.removeprefix("Apply at ").strip()
                     if not _is_aggregator_url(hop_url):
                         target_official_url = hop_url
                         break
-        if target_official_url is None and search_query:
+        if flagged_as_blog and target_official_url is None and search_query:
             try:
                 for lead in rt.search(search_query, rt.settings):
                     if not _is_aggregator_url(lead.url) and rt.robots.allowed(lead.url):
@@ -364,6 +376,7 @@ def _handle_inspect_portal(rt: Runtime, task: frontier.ClaimedTask) -> None:
             try:
                 # Replace `got` completely: zero blog text is kept.
                 got = _fetch_portal_page(rt, target_official_url)
+                chosen_hop_url = target_official_url
             except (BlockedUrl, FetchFailed):
                 pass
 
@@ -422,12 +435,28 @@ def _handle_inspect_portal(rt: Runtime, task: frontier.ClaimedTask) -> None:
     slug = task.payload["opportunity_slug"]
     direction_slug = task.payload.get("direction_slug")
     with session_scope() as session:
-        before = catalogue.get_opportunity(session, slug).status
+        sync_learned_signals_from_db(session)
+        before_opp = catalogue.get_opportunity(session, slug)
+        before = before_opp.status
         source = catalogue.store_snapshot(session, got.snapshot)
         full_source = catalogue.get_source(session, source.id)
         blueprint_draft = rt.portal_inspector(slug, full_source)
         bp = catalogue.record_portal_blueprint(session, blueprint_draft)
         after = catalogue.get_opportunity(session, slug).status
+        learn_from_crawl_outcome(
+            session,
+            source_url=initial_url,
+            links=initial_links,
+            chosen_target_url=chosen_hop_url,
+            yielded_opportunity=True,
+            is_aggregator_blog=flagged_as_blog,
+        )
+        if after is catalogue.OpportunityStatus.VERIFIED:
+            evolve_direction_from_discovery(
+                session,
+                title=slug.replace("-", " "),
+                official_url=bp.portal_url,
+            )
         if (
             direction_slug
             and before is not catalogue.OpportunityStatus.VERIFIED

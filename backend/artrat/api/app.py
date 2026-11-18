@@ -23,6 +23,7 @@ from artrat.platform.urls import BlockedUrl, assert_public_http_url
 from artrat.research import frontier
 from artrat.research.agent import LINK_DROP_PRIORITY
 from artrat.research.directions import ResearchDirectionOut, ensure_default_directions
+from artrat.research.learning import LearnedSignalOut, sync_learned_signals_from_db
 from artrat.research.links import canonical_url, resolve_dropped_link
 from artrat.research.tables import TaskKind
 from artrat.student import api as student
@@ -84,6 +85,7 @@ class SubmitRequestIn(BaseModel):
 
 class ChatRequestIn(BaseModel):
     message: str = Field(min_length=1)
+    student_id: uuid.UUID | None = None
     media_data_url: str | None = None
     audio_data_url: str | None = None
     output_format: Literal["text", "json", "audio"] = "text"
@@ -99,6 +101,8 @@ class ChatResponseOut(BaseModel):
     media_extracted: str | None = None
     audio_transcribed: str | None = None
     audio_output: str | None = None
+    reasoning_steps: list[str] = Field(default_factory=list)
+    actions: list[dict] = Field(default_factory=list)
 
 
 @asynccontextmanager
@@ -196,8 +200,14 @@ def research_status(session: DbSession) -> dict[str, int]:
 
 @app.get("/v1/research/directions", response_model=list[ResearchDirectionOut])
 def research_directions(session: DbSession) -> list[ResearchDirectionOut]:
-    """Active Research Directions and their Thompson-sampling yield counters."""
+    """Active Research Directions and their Thompson-sampling + UCB1 + LinUCB yield counters."""
     return ensure_default_directions(session)
+
+
+@app.get("/v1/research/learned-signals", response_model=list[LearnedSignalOut])
+def research_learned_signals(session: DbSession) -> list[LearnedSignalOut]:
+    """Self-learned empirical Bayesian weights for anchor phrases, funding cues, and domains."""
+    return sync_learned_signals_from_db(session)
 
 
 @app.post("/v1/research/link-drop", response_model=LinkDropOut)
@@ -446,12 +456,28 @@ def declare_and_submit_endpoint(
 
 
 @app.post("/v1/chat", response_model=ChatResponseOut)
-def chat_endpoint(body: ChatRequestIn) -> ChatResponseOut:
+def chat_endpoint(body: ChatRequestIn, session: DbSession) -> ChatResponseOut:
     """Multimodal student chat endpoint:
     - `baidu/ernie-5.5-flash-preview:free` for text and core reasoning across all inputs
     - `nvidia/nemotron-3.5-super-vl:free` (`super vl`) for media inputs
     - `fish-audio/s2.1-pro-free:free` for audio inputs/outputs
+    Automatically injects the student's live profile, Vault, and catalogue context when available.
     """
+    enriched_context = body.context or ""
+    if body.student_id is not None:
+        try:
+            stu = student.get_student(session, body.student_id)
+            docs = student.list_vault_documents(session, body.student_id)
+            facts = student.list_student_facts(session, body.student_id)
+            stu_block = (
+                f"Student: {stu.full_name} ({stu.academic_level}, {stu.department} at {stu.institution}, "
+                f"State/LGA: {stu.state_of_origin}/{stu.lga})\n"
+                f"Vault Documents ({len(docs)}): {', '.join(d.title for d in docs)}\n"
+                f"Profile Facts: {', '.join(f'{f.key}={f.value}' for f in facts)}"
+            )
+            enriched_context = f"{stu_block}\n{enriched_context}".strip()
+        except student.StudentNotFound:
+            pass
     try:
         gateway = OpenRouterGateway(get_settings())
         result = gateway.chat(
@@ -459,7 +485,7 @@ def chat_endpoint(body: ChatRequestIn) -> ChatResponseOut:
             media_data_url=body.media_data_url,
             audio_data_url=body.audio_data_url,
             output_format=body.output_format,
-            context=body.context,
+            context=enriched_context or None,
         )
         return ChatResponseOut.model_validate(result)
     except MissingApiKey as exc:

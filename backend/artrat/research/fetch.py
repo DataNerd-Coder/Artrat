@@ -19,6 +19,7 @@ from scrapling.parser import Selector
 from artrat.catalogue.api import FetchMode, SnapshotIn
 from artrat.platform.config import Settings
 from artrat.platform.urls import assert_public_http_url
+from artrat.research.learning import is_learned_apply_anchor
 
 MAX_REDIRECTS = 5
 REDIRECT_CODES = {301, 302, 303, 307, 308}
@@ -77,9 +78,10 @@ def parse_page(html: str, base_url: str) -> ParsedPage:
             resolved = urljoin(base_url, href)
             links.append(Link(url=resolved, anchor=anchor))
             low_anchor = anchor.lower()
-            if any(t in low_anchor for t in APPLY_ANCHOR_TERMS) and resolved.startswith(
-                ("http://", "https://")
-            ):
+            if (
+                any(t in low_anchor for t in APPLY_ANCHOR_TERMS)
+                or is_learned_apply_anchor(anchor, resolved)
+            ) and resolved.startswith(("http://", "https://")):
                 outbound_apply_lines.append(f"Apply at {resolved}")
     control_lines: list[str] = []
     for ctrl in page.css("input, select, textarea"):

@@ -25,7 +25,18 @@ from artrat.llm.gateway import (
 )
 from artrat.platform.config import Settings
 from artrat.research import agent
+from artrat.research.directions import (
+    choose_directions,
+    evolve_direction_from_discovery,
+    list_directions,
+)
 from artrat.research.extract import extract_from_source
+from artrat.research.learning import (
+    is_learned_aggregator_url,
+    is_learned_apply_anchor,
+    learn_from_crawl_outcome,
+    sync_learned_signals_from_db,
+)
 from artrat.research.portal import inspect_portal_snapshot
 
 NOW = datetime(2026, 11, 17, tzinfo=UTC)
@@ -375,6 +386,35 @@ def test_multimodal_chat_routes_media_and_audio_with_ernie_core_reasoning():
     assert out["media_model_used"] == "nvidia/nemotron-3.5-super-vl:free"
     assert out["audio_model_used"] == "fish-audio/s2.1-pro-free:free"
     assert out["output_format"] == "json"
+
+
+def test_self_learning_signals_and_statistical_ensemble_evolution(session):
+    # 1. Novel anchor phrase ('enter candidate portal') and new aggregator blog ('campusgist.ng')
+    # are learned from crawl outcomes without being in any hardcoded seed list.
+    learn_from_crawl_outcome(
+        session,
+        source_url="https://www.campusgist.ng/2026-scholarship/",
+        links=[("Enter Candidate Workspace", "https://portal.sponsor.org/candidate")],
+        chosen_target_url="https://portal.sponsor.org/candidate",
+        yielded_opportunity=True,
+        is_aggregator_blog=True,
+    )
+    signals = sync_learned_signals_from_db(session)
+    assert any(s.category == "aggregator_host" and s.phrase == "campusgist.ng" for s in signals)
+    assert is_learned_aggregator_url("https://campusgist.ng/some-post")
+    assert is_learned_apply_anchor("Enter Candidate Workspace", "https://portal.sponsor.org/candidate")
+
+    # 2. Verified discovery autonomously evolves a new ResearchDirection arm in the ensemble.
+    evolved_slug = evolve_direction_from_discovery(
+        session,
+        title="2026 Tohoku IGPAS MEXT Fellowship",
+        official_url="https://www.sci.tohoku.ac.jp/english/igpas/application.html",
+    )
+    assert evolved_slug == "evolved-sci-scholarships"
+    all_dirs = list_directions(session)
+    assert any(d.slug == "evolved-sci-scholarships" for d in all_dirs)
+    chosen = choose_directions(session, count=3)
+    assert len(chosen) == 3
 
 
 def test_openrouter_budget_guardrail_stops_when_limit_reached(session):

@@ -4,6 +4,7 @@ from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from artrat.platform.urls import BlockedUrl, assert_public_http_url
 from artrat.research.fetch import Link
+from artrat.research.learning import match_learned_funding_cue
 
 CANDIDATE_TLDS = (".com", ".org", ".ng", ".com.ng", ".edu.ng", ".net")
 
@@ -63,9 +64,13 @@ def resolve_dropped_link(raw: str, *, guard=assert_public_http_url) -> str:
 
 
 def funding_term(link: Link) -> str | None:
-    """The funding term a link's anchor text or path mentions, if any."""
+    """The funding term a link's anchor text or path mentions (seed or self-learned), if any."""
     haystack = f"{link.anchor} {urlsplit(link.url).path.replace('-', ' ').replace('_', ' ')}".lower()
-    return next((t for t in FUNDING_TERMS if t in haystack), None)
+    seed_hit = next((t for t in FUNDING_TERMS if t in haystack), None)
+    if seed_hit is not None:
+        return seed_hit
+    learned_cue, weight = match_learned_funding_cue(haystack)
+    return learned_cue if weight >= 0.65 else None
 
 
 def follow_candidates(links: list[Link], from_url: str) -> list[tuple[str, Link, str]]:

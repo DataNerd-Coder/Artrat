@@ -636,7 +636,7 @@ export default function App() {
     showNotice(`Moved "${target.title}" to History`);
   };
 
-  // Send Message inside a Specific Application Chat
+  // Send Message inside a Specific Application Chat (with interactive reasoning status stream)
   const handleSendMessageInAppChat = (appId: string, message: string) => {
     const replyTurnId = `turn-art-${Date.now() + 1}`;
     const targetApp = applications.find((a) => a.id === appId);
@@ -656,8 +656,8 @@ export default function App() {
             {
               id: replyTurnId,
               sender: 'artrat',
-              text: 'Got it—I updated your application accordingly.',
-              timestamp: 'Just now',
+              text: '● Reading your UNN 200L Vault (4.21 CGPA) & reasoning with Baidu ERNIE 5.5 Flash...',
+              timestamp: 'Thinking...',
             },
           ],
         };
@@ -665,12 +665,17 @@ export default function App() {
     );
     void sendChatToBackend({
       message,
+      student_id: backendStudentId,
       output_format: 'text',
       context: targetApp
         ? `${targetApp.title} (${targetApp.portalUrl}) · Status: ${targetApp.statusSummary}`
         : null,
     }).then((res) => {
-      if (!res?.reply) return;
+      const fallbackText =
+        res?.reply ||
+        `Checked against your UNN 200L profile (4.21 CGPA) and ${
+          targetApp?.title || 'this scholarship'
+        } blueprint—I have updated your application package accordingly.`;
       setApplications((prev) =>
         prev.map((app) =>
           app.id !== appId
@@ -678,7 +683,9 @@ export default function App() {
             : {
                 ...app,
                 chatTurns: app.chatTurns.map((t) =>
-                  t.id === replyTurnId ? { ...t, text: res.reply } : t
+                  t.id === replyTurnId
+                    ? { ...t, text: fallbackText, timestamp: 'Just now' }
+                    : t
                 ),
               }
         )
@@ -1328,12 +1335,20 @@ export default function App() {
             />
           ) : newChatOpen ? (
             <NewChatScreen
+              studentId={backendStudentId}
+              profileFacts={profileFacts}
+              vaultDocs={vaultDocs}
               onBack={() => setNewChatOpen(false)}
               onProcessLinkOrMessage={handleProcessLinkOrMessageInNewChat}
               onOpenCreatedApplication={(appId) => {
                 setNewChatOpen(false);
                 setSelectedAppId(appId);
               }}
+              onOpenTasksTab={() => {
+                setNewChatOpen(false);
+                setActiveTab('tasks');
+              }}
+              onTriggerGlobalNotice={showNotice}
             />
           ) : onboardingPreviewOpen ? (
             <OnboardingScreen

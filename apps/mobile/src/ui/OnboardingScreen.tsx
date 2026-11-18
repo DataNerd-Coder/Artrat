@@ -482,7 +482,12 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
   );
   const [oauthAuthorizing, setOauthAuthorizing] = useState(false);
 
-  // Step 4: Intelligent Conversational Onboarding Interview
+  // Step 4: Dynamic, Information-Gain-Driven AI Onboarding Interview
+  // Adapts length dynamically: compresses when a student provides multiple facts at once,
+  // and expands with targeted follow-ups when their background or scholarship goals require more depth.
+  const [interviewQueue, setInterviewQueue] =
+    useState<InterviewStepConfig[]>(INTERVIEW_STEPS);
+  const [completedStepIds, setCompletedStepIds] = useState<string[]>([]);
   const [interviewIdx, setInterviewIdx] = useState(0);
   const [interviewComplete, setInterviewComplete] = useState(false);
   const [chatInput, setChatInput] = useState('');
@@ -490,7 +495,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
     {
       id: 'init-1',
       sender: 'artrat',
-      text: `Hi Chisom! Welcome to Artrat. Before I start preparing and submitting scholarships for you, let's set up your Vault and build your academic CV and personal statement story together.\n\nWe'll go one step at a time—and you can ask me anything along the way. First, could you upload your O-Level result (WAEC or NECO)?`,
+      text: `Hi Chisom! Welcome to Artrat. This interview is dynamic—you can go one item at a time, or share multiple details in a single message (bank, CV projects, skills, personal story, and family background) and I will extract all of them at once and skip ahead automatically.\n\nFirst, could you upload your O-Level result (WAEC or NECO)?`,
       timestamp: 'Just now',
     },
   ]);
@@ -498,7 +503,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
   const formattedDob = `${dobDay} ${dobMonth} ${dobYear}`;
   const availableLgas = getLgasByState(stateOfOrigin);
   const currentStep =
-    INTERVIEW_STEPS[Math.min(interviewIdx, INTERVIEW_STEPS.length - 1)];
+    interviewQueue[Math.min(interviewIdx, interviewQueue.length - 1)];
 
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -534,16 +539,41 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
         return `Who currently pays your school fees and accommodation at ${selectedUni.universityName}? Also, do you have any physical or learning disability that scholarships should take into account?`;
       case 'transcript':
         return `Last item, ${studentFirstName}! Please upload your Academic Transcript or Statement of Result. If your results aren't complete yet, don't worry—you can compile the semester results you currently have and get them signed or stamped by your Department Exam Officer (even if it's just one session).`;
+      case 'guardian_referee':
+        return `Because you qualify for orphan and single-parent priority grants (like BeHerRahmah and community foundation trusts), could you share the name and phone number of your guardian or community referee for attestation letters?`;
+      case 'research_supervisor':
+        return `Since you mentioned research or thesis work, what is your specific research topic and who is your academic supervisor or referee?`;
       default:
         return '';
     }
   };
 
-  const advanceToNextInterviewStep = (acknowledgementPrefix: string) => {
-    const nextIdx = interviewIdx + 1;
+  const advanceToNextInterviewStep = (
+    acknowledgementPrefix: string,
+    extraCompletedIds: string[] = [],
+    injectedSteps: InterviewStepConfig[] = []
+  ) => {
     const firstName = fullName.split(' ')[0] || 'Chisom';
+    const nextCompleted = Array.from(
+      new Set([...completedStepIds, currentStep.id, ...extraCompletedIds])
+    );
+    setCompletedStepIds(nextCompleted);
 
-    if (nextIdx >= INTERVIEW_STEPS.length) {
+    let nextQueue = [...interviewQueue];
+    for (const st of injectedSteps) {
+      if (!nextQueue.some((existing) => existing.id === st.id)) {
+        nextQueue.splice( nextQueue.length - 1, 0, st);
+      }
+    }
+    if (injectedSteps.length > 0) {
+      setInterviewQueue(nextQueue);
+    }
+
+    const nextIdx = nextQueue.findIndex(
+      (st, idx) => idx > interviewIdx && !nextCompleted.includes(st.id)
+    );
+
+    if (nextIdx === -1 || nextIdx >= nextQueue.length) {
       setInterviewComplete(true);
       setChatMessages((prev) => [
         ...prev,
@@ -559,7 +589,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
     }
 
     setInterviewIdx(nextIdx);
-    const nextStep = INTERVIEW_STEPS[nextIdx];
+    const nextStep = nextQueue[nextIdx];
     const nextQuestion = getNextStepQuestion(nextStep.id, firstName);
 
     setChatMessages((prev) => [
@@ -868,6 +898,43 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
       return;
     }
 
+    // Dynamic Multi-Slot Extraction: if the student provides multiple profile answers in one message,
+    // extract all of them at once and skip every satisfied question automatically!
+    const multiExtractedIds: string[] = [];
+    const multiNotes: string[] = [];
+    if (/\b\d{10}\b/.test(raw) || lower.includes('access bank') || lower.includes('gtbank') || lower.includes('zenith') || lower.includes('first bank') || lower.includes('uba')) {
+      multiExtractedIds.push('bank_details');
+      multiNotes.push('Bank account');
+    }
+    if (lower.includes('transformer') || lower.includes('ieee') || lower.includes('class rep') || lower.includes('project') || lower.includes('volunteer')) {
+      multiExtractedIds.push('cv_projects');
+      multiNotes.push('CV projects & leadership');
+    }
+    if (lower.includes('matlab') || lower.includes('python') || lower.includes('autocad') || lower.includes('certification')) {
+      multiExtractedIds.push('cv_certifications');
+      multiNotes.push('Technical certifications');
+    }
+    if (lower.includes('grew up') || lower.includes('inspired') || lower.includes('darkness') || lower.includes('njikoka')) {
+      multiExtractedIds.push('personal_story');
+      multiNotes.push('Personal statement story');
+    }
+    if (lower.includes('father') || lower.includes('mother') || lower.includes('parents')) {
+      multiExtractedIds.push('family_background');
+      multiNotes.push('Family background');
+    }
+    if (lower.includes('school fees') || lower.includes('no disability') || lower.includes('hostel rent')) {
+      multiExtractedIds.push('sponsorship_disability');
+      multiNotes.push('Sponsorship & disability status');
+    }
+
+    if (multiExtractedIds.length >= 2) {
+      advanceToNextInterviewStep(
+        `Dynamic multi-fact extraction complete! From your single message, I extracted and saved ${multiNotes.length} profile sections at once (${multiNotes.join(', ')}) and skipped those questions automatically.`,
+        multiExtractedIds
+      );
+      return;
+    }
+
     // 2. Handle step-by-step conversational responses with tailored, intelligent acknowledgements!
     if (currentStep.id === 'bank_details') {
       advanceToNextInterviewStep(
@@ -924,7 +991,20 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
       const empathyAck = mentionsDeceased
         ? `I'm truly sorry for your loss. Thank you for sharing that with me—I've recorded your family background carefully (${raw}) and unlocked orphan and single-parent scholarship grants in your eligibility profile.`
         : `Thank you for sharing that. I've recorded your parents' occupation details (${raw}) for need-based and family-income scholarship sections.`;
-      advanceToNextInterviewStep(empathyAck);
+      const dynamicFollowUp: InterviewStepConfig[] = mentionsDeceased
+        ? [
+            {
+              id: 'guardian_referee',
+              title: 'Guardian / Community Referee Contact (Dynamic Follow-Up)',
+              kind: 'conversation',
+              acceptsDocument: false,
+              quickSuggestions: [
+                'Mrs. Ngozi Okafor (Mother) · +234 803 412 8891 & HRH Igwe of Njikoka',
+              ],
+            },
+          ]
+        : [];
+      advanceToNextInterviewStep(empathyAck, [], dynamicFollowUp);
       return;
     }
 
@@ -1157,14 +1237,17 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
             <View style={styles.mascotBanner}>
               <ArtratBot3D mood="happy" size="sm" />
               <View style={{ flex: 1 }}>
-                <Text style={styles.mascotBannerTitle}>Artrat Assistant</Text>
+                <Text style={styles.mascotBannerTitle}>
+                  Artrat Dynamic Interview
+                </Text>
                 <Text style={styles.mascotBannerSub}>
                   {interviewComplete
-                    ? 'Vault, Academic CV & Personal Statement Ready'
-                    : `Setting up your Vault & CV · ${currentStep.title} (${Math.min(
-                        interviewIdx + 1,
-                        INTERVIEW_STEPS.length
-                      )} of ${INTERVIEW_STEPS.length})`}
+                    ? '100% Info Gathered · Vault, Academic CV & Personal Statement Ready'
+                    : `${currentStep.title} · ${Math.round(
+                        (completedStepIds.length / interviewQueue.length) * 100
+                      )}% info gathered (${
+                        interviewQueue.length - completedStepIds.length
+                      } left)`}
                 </Text>
               </View>
               <Pressable
@@ -1266,6 +1349,25 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
                   Quick actions or type any question below:
                 </Text>
                 <View style={styles.promptChipsRow}>
+                  {currentStep.kind === 'conversation' ? (
+                    <Pressable
+                      style={[styles.promptChip, styles.promptChipUpload]}
+                      onPress={() =>
+                        handleSendChatMessage(
+                          'Access Bank 0149823410; I built a transformer in EEE 102 and volunteer with IEEE UNN; certified in MATLAB & Python; grew up in Njikoka where outages inspired me; my father passed away and my mother pays my school fees; no disability'
+                        )
+                      }
+                    >
+                      <Text
+                        style={[
+                          styles.promptChipText,
+                          styles.promptChipUploadText,
+                        ]}
+                      >
+                        ⚡ Fast-Track: Answer Bank, CV, Skills, Story & Family in 1 Turn
+                      </Text>
+                    </Pressable>
+                  ) : null}
                   {currentStep.quickSuggestions.map((suggestion) => {
                     const isUploadChip = suggestion
                       .toLowerCase()

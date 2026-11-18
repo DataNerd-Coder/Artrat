@@ -123,10 +123,13 @@ export interface BackendChatResponse {
   media_extracted?: string | null;
   audio_transcribed?: string | null;
   audio_output?: string | null;
+  reasoning_steps?: string[];
+  actions?: Array<{ type: string; [key: string]: unknown }>;
 }
 
 export async function sendChatToBackend(payload: {
   message: string;
+  student_id?: string | null;
   media_data_url?: string | null;
   audio_data_url?: string | null;
   output_format?: 'text' | 'json' | 'audio';

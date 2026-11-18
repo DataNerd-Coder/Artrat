@@ -87,3 +87,20 @@ class ResearchDirectionRow(Base):
     expired_opportunities: Mapped[int] = mapped_column(Integer, default=0)
     total_cost: Mapped[float] = mapped_column(Float, default=0.0)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class LearnedSignalRow(Base):
+    """Self-learning empirical Bayesian weights for anchor phrases, funding cues, and domains."""
+
+    __tablename__ = "learned_signal"
+    __table_args__ = (
+        UniqueConstraint("category", "phrase", name="uq_learned_signal_category_phrase"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    category: Mapped[str] = mapped_column(String(40), index=True)
+    phrase: Mapped[str] = mapped_column(String(200), index=True)
+    alpha: Mapped[float] = mapped_column(Float, default=1.5)
+    beta: Mapped[float] = mapped_column(Float, default=1.0)
+    observations: Mapped[int] = mapped_column(Integer, default=0)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))

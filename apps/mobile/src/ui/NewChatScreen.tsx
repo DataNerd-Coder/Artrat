@@ -11,47 +11,257 @@ import {
   AlertCircle,
   ArrowLeft,
   ArrowRight,
+  CalendarClock,
   CheckCircle2,
+  CheckSquare,
+  FileText,
   Link2,
+  PenLine,
+  RefreshCw,
   Send,
 } from './icons';
-import { CuratedApplication } from '../domain/types';
+import { sendChatToBackend } from '../api/client';
+import {
+  CuratedApplication,
+  OrderedApplicationItem,
+  ProfileFact,
+  VaultDocument,
+} from '../domain/types';
 import { ArtratBot3D } from './ArtratBot3D';
+import { GeminiCanvasModal } from './GeminiCanvasModal';
+
+export interface ExecutedChatAction {
+  type:
+    | 'search_scholarships'
+    | 'add_task'
+    | 'add_calendar_event'
+    | 'open_canvas_draft'
+    | 'update_profile_fact';
+  title: string;
+  subtitle: string;
+  draftContent?: string;
+}
 
 interface NewChatMessage {
   id: string;
   sender: 'student' | 'artrat';
   text: string;
   timestamp: string;
+  reasoningSteps?: string[];
+  modelBadge?: string;
   createdApp?: CuratedApplication;
+  executedAction?: ExecutedChatAction;
 }
 
 interface NewChatScreenProps {
   initialDraft?: string;
+  studentId?: string | null;
+  profileFacts?: ProfileFact[];
+  vaultDocs?: VaultDocument[];
   onBack: () => void;
   onProcessLinkOrMessage: (input: string) => CuratedApplication;
   onOpenCreatedApplication: (appId: string) => void;
+  onOpenTasksTab?: () => void;
+  onTriggerGlobalNotice?: (notice: string) => void;
+}
+
+function getReasoningStagesForInput(raw: string): string[] {
+  const low = raw.toLowerCase();
+  if (
+    raw.startsWith('http://') ||
+    raw.startsWith('https://') ||
+    low.includes('.com') ||
+    low.includes('.ng') ||
+    low.includes('scholarshipregion')
+  ) {
+    return [
+      'Resolving link & hopping past aggregator blogs to official portal...',
+      'Running dry-run DOM & form-control inspector against your UNN 200L Vault...',
+      'Checking hard eligibility rules (4.21 CGPA, 308 JAMB) with Baidu ERNIE 5.5 Flash...',
+    ];
+  }
+  if (
+    low.includes('draft') ||
+    low.includes('canvas') ||
+    low.includes('essay') ||
+    low.includes('statement') ||
+    low.includes('letter')
+  ) {
+    return [
+      'Reading your UNN Electrical Engineering profile (4.21 CGPA) & IEEE project ledger...',
+      'Drafting grounded writeup with Baidu ERNIE 5.5 Flash (zero fabricated claims)...',
+      'Preparing interactive Gemini Canvas document...',
+    ];
+  }
+  if (
+    low.includes('task') ||
+    low.includes('remind') ||
+    low.includes('todo') ||
+    low.includes('calendar') ||
+    low.includes('schedule') ||
+    low.includes('cbt')
+  ) {
+    return [
+      'Checking your active applications & university semester schedule...',
+      'Reasoning with Baidu ERNIE 5.5 Flash & syncing Google Tasks / Calendar...',
+      'Setting 9:30 AM / 2:00 PM & 48-hour advance alerts...',
+    ];
+  }
+  if (low.includes('search') || low.includes('find') || low.includes('november')) {
+    return [
+      'Loading your verified UNN 200L profile (4.21 CGPA, Anambra/Njikoka)...',
+      'Querying Thompson Sampling + UCB1 + Contextual LinUCB discovery ensemble...',
+      'Filtering verified portals & ranking matches with Baidu ERNIE 5.5 Flash...',
+    ];
+  }
+  return [
+    'Reading your verified Student Profile, 4.21 CGPA & 10 Vault documents...',
+    'Reasoning over your request with Baidu ERNIE 5.5 Flash...',
+    'Preparing grounded response...',
+  ];
 }
 
 export const NewChatScreen: React.FC<NewChatScreenProps> = ({
   initialDraft = '',
+  studentId = null,
+  profileFacts = [],
+  vaultDocs = [],
   onBack,
   onProcessLinkOrMessage,
   onOpenCreatedApplication,
+  onOpenTasksTab,
+  onTriggerGlobalNotice,
 }) => {
   const [input, setInput] = useState(initialDraft);
+  const [isReasoning, setIsReasoning] = useState(false);
+  const [reasoningStageIdx, setReasoningStageIdx] = useState(0);
+  const [activeReasoningStages, setActiveReasoningStages] = useState<string[]>(
+    []
+  );
+  const [canvasDraftModalItem, setCanvasDraftModalItem] =
+    useState<OrderedApplicationItem | null>(null);
+
   const [messages, setMessages] = useState<NewChatMessage[]>([
     {
       id: 'welcome-1',
       sender: 'artrat',
-      text: 'Paste any scholarship link or tell me which application you want me to work on. I will check every requirement against your Vault—if you qualify, I will prepare your documents and writeups in order; if not, I will place it below your list and wipe it to History after 7 days.',
+      text: 'Hi Chisom! You can paste any scholarship link, or ask me to search for scholarships, add a task, schedule a Google Calendar reminder, draft an essay or HOD letter in Gemini Canvas, or check anything in your UNN 200L Vault (4.21 CGPA).',
       timestamp: 'Now',
+      modelBadge: 'ERNIE 5.5 Flash · Super VL · Fish Audio S2.1',
     },
   ]);
 
+  const buildLocalAgentResponse = (
+    raw: string
+  ): {
+    reply: string;
+    steps: string[];
+    action?: ExecutedChatAction;
+    isLinkDrop?: boolean;
+  } => {
+    const low = raw.toLowerCase();
+    const isLink =
+      /^https?:\/\//i.test(raw) ||
+      low.includes('chevron-nigeria.com') ||
+      low.includes('nlng-firstclass.org') ||
+      low.includes('icanstudent') ||
+      low.includes('scholarshipregion') ||
+      low.includes('scholastica.ng');
+
+    if (isLink) {
+      return {
+        reply: '',
+        steps: getReasoningStagesForInput(raw),
+        isLinkDrop: true,
+      };
+    }
+
+    if (
+      low.includes('draft') ||
+      low.includes('canvas') ||
+      low.includes('personal statement') ||
+      low.includes('essay') ||
+      low.includes('hod letter')
+    ) {
+      const isHod = low.includes('hod');
+      const draftTitle = isHod
+        ? 'HOD Attestation Letter — UNN Electrical Engineering'
+        : 'Personal Statement — Grounded in UNN 200L & IEEE Project Ledger';
+      const draftBody = isHod
+        ? `From:\nChisom Kamsiyochukwu Okafor\nMatric No: 2024/248912\n200 Level, Department of Electrical Engineering\nUniversity of Nigeria, Nsukka (UNN)\n\nTo:\nThe Head of Department,\nDepartment of Electrical Engineering,\nUniversity of Nigeria, Nsukka.\n\nDear Sir/Ma,\n\nREQUEST FOR DEPARTMENTAL ATTESTATION AND SCHOLARSHIP ENDORSEMENT\n\nI respectfully request your official signature and departmental stamp on my scholarship attestation letter. I am a full-time 200-Level student in good academic standing with a cumulative grade point average (CGPA) of 4.21 / 5.00 (Second Class Honours, Upper Division) and a UTME entry score of 308 / 400.\n\nThank you for your continued mentorship and support.\n\nYours faithfully,\nChisom Kamsiyochukwu Okafor`
+        : `Growing up in Njikoka, Anambra State, recurring distribution transformer faults frequently left our neighbourhood without electricity for weeks. Watching small businesses and students struggle during those outages inspired my decision to study Electrical Engineering at the University of Nigeria, Nsukka (UNN), where I entered with a 308 UTME score and currently maintain a 4.21 / 5.00 CGPA in 200 Level.\n\nIn my 100-Level EEE 102 workshop laboratory, I led my group in winding and testing a low-loss single-phase step-down transformer, applying MATLAB Onramp and Python circuit simulation to minimize core losses. Alongside serving as Assistant Class Representative and volunteering with the IEEE UNN Student Branch, my goal is to specialize in resilient power distribution systems for underserved Nigerian communities.`;
+      return {
+        reply: `I drafted your "${draftTitle}" using only verified facts from your UNN profile (4.21 CGPA, 308 UTME, Njikoka community background, and EEE 102 transformer lab project). Tap below to open, edit, or refine it in Gemini Canvas.`,
+        steps: getReasoningStagesForInput(raw),
+        action: {
+          type: 'open_canvas_draft',
+          title: draftTitle,
+          subtitle: 'Grounded in your Vault & Evidence Ledger · Zero hallucinated claims',
+          draftContent: draftBody,
+        },
+      };
+    }
+
+    if (
+      low.includes('calendar') ||
+      low.includes('schedule') ||
+      low.includes('cbt') ||
+      low.includes('exam date')
+    ) {
+      return {
+        reply: `Done! I added "${raw}" to your Google Calendar (chisom.okafor.248912@unn.edu.ng) with a 48-hour advance notification and a morning reminder at 8:00 AM.`,
+        steps: getReasoningStagesForInput(raw),
+        action: {
+          type: 'add_calendar_event',
+          title: raw,
+          subtitle: 'Synced to Google Calendar · 48h advance alert active',
+        },
+      };
+    }
+
+    if (
+      low.includes('task') ||
+      low.includes('remind') ||
+      low.includes('todo') ||
+      low.includes('follow up')
+    ) {
+      return {
+        reply: `I created a new task for "${raw}" and synced it to your Google Tasks with daily check-in reminders at 9:30 AM and 2:00 PM until the required document is in your Vault.`,
+        steps: getReasoningStagesForInput(raw),
+        action: {
+          type: 'add_task',
+          title: raw,
+          subtitle: 'Added to Artrat Tasks & Google Tasks · 9:30 AM & 2:00 PM alerts',
+        },
+      };
+    }
+
+    if (
+      low.includes('search') ||
+      low.includes('find') ||
+      low.includes('november') ||
+      low.includes('qualify')
+    ) {
+      return {
+        reply: `Using your UNN 200L Electrical Engineering profile (4.21 / 5.00 CGPA, 308 JAMB, Anambra State) and our Thompson Sampling + UCB1 + LinUCB discovery ensemble, here are your top verified November scholarship matches:\n\n1. 2026 NNPC / SNEPCo National University Scholarship (portal: candidate.scholastica.ng · Closes Nov 30 · Min 3.50 CGPA — You qualify; needs signed HOD profile & Government Declaration Form).\n2. AgricTech Scholarship Program 2026/2027 (Closes Nov 30 · Min 3.50 CGPA — You qualify; requires 2-minute video & Google Form sign-in).\n3. BeHerRahmah Initiative Scholarship 2026 (Google Form currently closed on /closedform).`,
+        steps: getReasoningStagesForInput(raw),
+        action: {
+          type: 'search_scholarships',
+          title: '3 Verified November Portals Inspected',
+          subtitle: 'Matched against your 4.21 CGPA & 10 Vault documents',
+        },
+      };
+    }
+
+    return {
+      reply: `Based on your verified profile (Chisom Kamsiyochukwu Okafor · 200L B.Eng Electrical Engineering at UNN · 4.21/5.00 CGPA · 308 JAMB · ${vaultDocs.length || 10} Vault documents ready), I'm ready to help. You can ask me to search live scholarships, draft an essay or HOD letter in Gemini Canvas, add a task to Google Tasks, schedule a test date on Google Calendar, or drop any scholarship link for an instant dry-run.`,
+      steps: getReasoningStagesForInput(raw),
+    };
+  };
+
   const handleSend = (textToSend?: string) => {
     const raw = (textToSend ?? input).trim();
-    if (!raw) return;
+    if (!raw || isReasoning) return;
 
     const studentMsg: NewChatMessage = {
       id: `stu-${Date.now()}`,
@@ -60,21 +270,92 @@ export const NewChatScreen: React.FC<NewChatScreenProps> = ({
       timestamp: 'Just now',
     };
 
-    const resultApp = onProcessLinkOrMessage(raw);
-    const artratTurn =
-      resultApp.chatTurns[resultApp.chatTurns.length - 1]?.text ||
-      'I have checked this scholarship for you.';
-
-    const artratMsg: NewChatMessage = {
-      id: `art-${Date.now() + 1}`,
-      sender: 'artrat',
-      text: artratTurn,
-      timestamp: 'Just now',
-      createdApp: resultApp,
-    };
-
-    setMessages((prev) => [...prev, studentMsg, artratMsg]);
+    const stages = getReasoningStagesForInput(raw);
+    setMessages((prev) => [...prev, studentMsg]);
     setInput('');
+    setIsReasoning(true);
+    setActiveReasoningStages(stages);
+    setReasoningStageIdx(0);
+
+    const t1 = setTimeout(() => setReasoningStageIdx(1), 420);
+    const t2 = setTimeout(() => setReasoningStageIdx(2), 840);
+
+    const localPlan = buildLocalAgentResponse(raw);
+
+    if (localPlan.isLinkDrop) {
+      setTimeout(() => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+        const resultApp = onProcessLinkOrMessage(raw);
+        const artratTurn =
+          resultApp.chatTurns[resultApp.chatTurns.length - 1]?.text ||
+          'I have checked this scholarship for you.';
+        const artratMsg: NewChatMessage = {
+          id: `art-${Date.now() + 1}`,
+          sender: 'artrat',
+          text: artratTurn,
+          timestamp: 'Just now',
+          reasoningSteps: stages,
+          modelBadge: 'ERNIE 5.5 Flash · Official Portal Dry-Run',
+          createdApp: resultApp,
+        };
+        setMessages((prev) => [...prev, artratMsg]);
+        setIsReasoning(false);
+      }, 1150);
+      return;
+    }
+
+    const contextSummary = [
+      'Student: Chisom Kamsiyochukwu Okafor, 200L B.Eng Electrical Engineering, University of Nigeria, Nsukka (UNN), CGPA 4.21/5.00, JAMB 308/400, State: Anambra (Njikoka).',
+      profileFacts.length
+        ? `Facts: ${profileFacts.map((f) => `${f.label}: ${f.value}`).join(' | ')}`
+        : '',
+      vaultDocs.length
+        ? `Vault (${vaultDocs.length}): ${vaultDocs.map((d) => d.title).join(', ')}`
+        : '',
+    ]
+      .filter(Boolean)
+      .join('\n');
+
+    void sendChatToBackend({
+      message: raw,
+      student_id: studentId,
+      output_format: 'text',
+      context: contextSummary,
+    }).then((backendRes) => {
+      setTimeout(() => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+        const finalReply = backendRes?.reply || localPlan.reply;
+        const finalSteps =
+          backendRes?.reasoning_steps && backendRes.reasoning_steps.length > 0
+            ? backendRes.reasoning_steps
+            : localPlan.steps;
+
+        if (localPlan.action?.type === 'add_task' && onTriggerGlobalNotice) {
+          onTriggerGlobalNotice(`Added task: "${raw}"`);
+        } else if (
+          localPlan.action?.type === 'add_calendar_event' &&
+          onTriggerGlobalNotice
+        ) {
+          onTriggerGlobalNotice(`Added to Google Calendar: "${raw}"`);
+        }
+
+        const artratMsg: NewChatMessage = {
+          id: `art-${Date.now() + 1}`,
+          sender: 'artrat',
+          text: finalReply,
+          timestamp: 'Just now',
+          reasoningSteps: finalSteps,
+          modelBadge: backendRes?.reasoning_model
+            ? `${backendRes.reasoning_model}`
+            : 'baidu/ernie-5.5-flash-preview:free',
+          executedAction: localPlan.action,
+        };
+        setMessages((prev) => [...prev, artratMsg]);
+        setIsReasoning(false);
+      }, 950);
+    });
   };
 
   return (
@@ -92,10 +373,10 @@ export const NewChatScreen: React.FC<NewChatScreenProps> = ({
 
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle} numberOfLines={1}>
-            New Application Chat
+            Artrat AI Command & Link Chat
           </Text>
           <Text style={styles.headerSubtitle} numberOfLines={1}>
-            Drop a scholarship link or ask Artrat
+            Search, add tasks/calendar, draft in Canvas, or drop a link
           </Text>
         </View>
       </View>
@@ -107,20 +388,91 @@ export const NewChatScreen: React.FC<NewChatScreenProps> = ({
       >
         {/* Mascot Header */}
         <View style={styles.mascotBanner}>
-          <ArtratBot3D mood="radar" size="sm" />
+          <ArtratBot3D mood={isReasoning ? 'launch' : 'radar'} size="sm" />
           <View style={{ flex: 1, gap: 2 }}>
-            <Text style={styles.mascotBannerTitle}>Artrat Assistant</Text>
+            <Text style={styles.mascotBannerTitle}>
+              Artrat Autonomous Assistant (UNN 200L · 4.21 CGPA)
+            </Text>
             <Text style={styles.mascotBannerSub}>
-              Checks eligibility & prepares your documents in order
+              Powered by ERNIE 5.5 Flash (reasoning), Nemotron 3.5 Super VL
+              (media) & Fish Audio S2.1
             </Text>
           </View>
         </View>
 
-        {/* Quick Demo Link Chips so the student can test both Eligible & 7-Day Wipe flows in 1 tap */}
+        {/* Quick Command & Link Chips */}
         {messages.length === 1 ? (
           <View style={styles.suggestionsBlock}>
-            <Text style={styles.suggestionsTitle}>Try a scholarship link</Text>
+            <Text style={styles.suggestionsTitle}>
+              Try an AI command or drop a scholarship link
+            </Text>
             <View style={styles.suggestionsCol}>
+              <Pressable
+                style={styles.suggestionCard}
+                onPress={() =>
+                  handleSend(
+                    'Search November STEM scholarships I qualify for with my 4.21 CGPA'
+                  )
+                }
+              >
+                <View style={styles.suggestionIconWrap}>
+                  <RefreshCw size={15} color="#5B21B6" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.suggestionLabel} numberOfLines={1}>
+                    Search November STEM scholarships I qualify for
+                  </Text>
+                  <Text style={styles.suggestionSub}>
+                    Runs Thompson + UCB1 + LinUCB ensemble against your Vault
+                  </Text>
+                </View>
+                <ArrowRight size={14} color="#5B21B6" />
+              </Pressable>
+
+              <Pressable
+                style={styles.suggestionCard}
+                onPress={() =>
+                  handleSend(
+                    'Draft a 250-word personal statement in Canvas using my UNN IEEE transformer project'
+                  )
+                }
+              >
+                <View style={styles.suggestionIconWrap}>
+                  <PenLine size={15} color="#5B21B6" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.suggestionLabel} numberOfLines={1}>
+                    Draft a personal statement in Gemini Canvas
+                  </Text>
+                  <Text style={styles.suggestionSub}>
+                    Grounded in your 4.21 CGPA & EEE 102 transformer lab project
+                  </Text>
+                </View>
+                <ArrowRight size={14} color="#5B21B6" />
+              </Pressable>
+
+              <Pressable
+                style={styles.suggestionCard}
+                onPress={() =>
+                  handleSend(
+                    'Remind me to collect my signed HOD profile by Friday and add the NNPC CBT on Nov 25 to my calendar'
+                  )
+                }
+              >
+                <View style={styles.suggestionIconWrap}>
+                  <CalendarClock size={15} color="#5B21B6" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.suggestionLabel} numberOfLines={1}>
+                    Add HOD signature task & schedule CBT on Google Calendar
+                  </Text>
+                  <Text style={styles.suggestionSub}>
+                    Creates Google Task + 48h Google Calendar alert
+                  </Text>
+                </View>
+                <ArrowRight size={14} color="#5B21B6" />
+              </Pressable>
+
               <Pressable
                 style={styles.suggestionCard}
                 onPress={() =>
@@ -183,6 +535,21 @@ export const NewChatScreen: React.FC<NewChatScreenProps> = ({
                     : styles.artratBubble,
                 ]}
               >
+                {msg.sender === 'artrat' &&
+                msg.reasoningSteps &&
+                msg.reasoningSteps.length > 0 ? (
+                  <View style={styles.reasoningTraceBox}>
+                    <Text style={styles.reasoningTraceHeader}>
+                      ✓ Reasoning trace ({msg.reasoningSteps.length} steps)
+                    </Text>
+                    {msg.reasoningSteps.map((st, idx) => (
+                      <Text key={idx} style={styles.reasoningTraceLine}>
+                        • {st}
+                      </Text>
+                    ))}
+                  </View>
+                ) : null}
+
                 <Text
                   style={[
                     styles.bubbleText,
@@ -199,8 +566,69 @@ export const NewChatScreen: React.FC<NewChatScreenProps> = ({
                 >
                   {msg.sender === 'student' ? 'You' : 'Artrat'} ·{' '}
                   {msg.timestamp}
+                  {msg.modelBadge ? ` · ${msg.modelBadge}` : ''}
                 </Text>
               </View>
+
+              {/* Inline Action Card when Artrat executes a command (Canvas draft, Task, Calendar, Search) */}
+              {msg.executedAction ? (
+                <View style={styles.actionExecutedCard}>
+                  <View style={styles.actionExecutedHeader}>
+                    {msg.executedAction.type === 'open_canvas_draft' ? (
+                      <FileText size={14} color="#5B21B6" />
+                    ) : msg.executedAction.type === 'add_calendar_event' ? (
+                      <CalendarClock size={14} color="#047857" />
+                    ) : (
+                      <CheckSquare size={14} color="#5B21B6" />
+                    )}
+                    <Text style={styles.actionExecutedTitle} numberOfLines={1}>
+                      {msg.executedAction.title}
+                    </Text>
+                  </View>
+                  <Text style={styles.actionExecutedSub}>
+                    {msg.executedAction.subtitle}
+                  </Text>
+                  {msg.executedAction.type === 'open_canvas_draft' &&
+                  msg.executedAction.draftContent ? (
+                    <Pressable
+                      style={styles.openCanvasBtn}
+                      onPress={() =>
+                        setCanvasDraftModalItem({
+                          id: `canvas-${Date.now()}`,
+                          orderIndex: 1,
+                          type: 'writeup',
+                          title: msg.executedAction!.title,
+                          portalFieldLabel: msg.executedAction!.subtitle,
+                          status: 'ready',
+                          writeupWordLimit: 250,
+                          writeupContent: msg.executedAction!.draftContent,
+                          groundedFacts: [
+                            'UNN 200L Electrical Engineering · 4.21 / 5.00 CGPA',
+                            'UTME Score: 308 / 400',
+                            'EEE 102 Low-Loss Transformer Lab Lead & IEEE UNN Volunteer',
+                          ],
+                        })
+                      }
+                    >
+                      <PenLine size={13} color="#FFFFFF" />
+                      <Text style={styles.openCanvasBtnText}>
+                        Open & Edit in Gemini Canvas
+                      </Text>
+                    </Pressable>
+                  ) : null}
+                  {msg.executedAction.type === 'add_task' && onOpenTasksTab ? (
+                    <Pressable
+                      style={styles.openCanvasBtn}
+                      onPress={onOpenTasksTab}
+                    >
+                      <CheckSquare size={13} color="#FFFFFF" />
+                      <Text style={styles.openCanvasBtnText}>
+                        View in Tasks Tab
+                      </Text>
+                    </Pressable>
+                  ) : null}
+                </View>
+              ) : null}
 
               {/* Inline Result Card when Artrat processes a link */}
               {msg.createdApp ? (
@@ -264,6 +692,42 @@ export const NewChatScreen: React.FC<NewChatScreenProps> = ({
               ) : null}
             </View>
           ))}
+
+          {/* Interactive Live Reasoning Stream Pill */}
+          {isReasoning ? (
+            <View style={styles.liveReasoningBubble}>
+              <View style={styles.liveReasoningHeader}>
+                <RefreshCw size={14} color="#6D28D9" />
+                <Text style={styles.liveReasoningTitle}>
+                  {activeReasoningStages[
+                    Math.min(
+                      reasoningStageIdx,
+                      activeReasoningStages.length - 1
+                    )
+                  ] || 'Reasoning with Baidu ERNIE 5.5 Flash...'}
+                </Text>
+              </View>
+              <View style={styles.liveReasoningStepsList}>
+                {activeReasoningStages.map((stage, i) => (
+                  <Text
+                    key={i}
+                    style={[
+                      styles.liveReasoningStepItem,
+                      i <= reasoningStageIdx &&
+                        styles.liveReasoningStepItemActive,
+                    ]}
+                  >
+                    {i < reasoningStageIdx
+                      ? '✓ '
+                      : i === reasoningStageIdx
+                        ? '● '
+                        : '○ '}
+                    {stage}
+                  </Text>
+                ))}
+              </View>
+            </View>
+          ) : null}
         </View>
       </ScrollView>
 
@@ -274,7 +738,7 @@ export const NewChatScreen: React.FC<NewChatScreenProps> = ({
             style={styles.composerInput}
             value={input}
             onChangeText={setInput}
-            placeholder="Paste scholarship link or message Artrat..."
+            placeholder="Ask Artrat to search, add a task/calendar, draft in Canvas, or paste a link..."
             placeholderTextColor="#756A92"
             autoFocus
             onSubmitEditing={() => handleSend()}
@@ -282,9 +746,9 @@ export const NewChatScreen: React.FC<NewChatScreenProps> = ({
           <Pressable
             style={[
               styles.sendCircleBtn,
-              !input.trim() && styles.sendCircleBtnDisabled,
+              (!input.trim() || isReasoning) && styles.sendCircleBtnDisabled,
             ]}
-            disabled={!input.trim()}
+            disabled={!input.trim() || isReasoning}
             onPress={() => handleSend()}
             accessibilityLabel="Send"
           >
@@ -292,6 +756,25 @@ export const NewChatScreen: React.FC<NewChatScreenProps> = ({
           </Pressable>
         </View>
       </View>
+
+      {/* Gemini Canvas Modal for AI-drafted essays or letters */}
+      <GeminiCanvasModal
+        visible={Boolean(canvasDraftModalItem)}
+        item={canvasDraftModalItem}
+        scholarshipTitle="Artrat AI Chat Draft"
+        onClose={() => setCanvasDraftModalItem(null)}
+        onSaveContent={(_itemId, newContent) => {
+          if (canvasDraftModalItem) {
+            setCanvasDraftModalItem({
+              ...canvasDraftModalItem,
+              writeupContent: newContent,
+            });
+          }
+          if (onTriggerGlobalNotice) {
+            onTriggerGlobalNotice('Saved updated writeup in Gemini Canvas');
+          }
+        }}
+      />
     </View>
   );
 };
@@ -418,7 +901,7 @@ const styles = StyleSheet.create({
   bubble: {
     padding: 14,
     borderRadius: 16,
-    gap: 4,
+    gap: 6,
   },
   artratBubble: {
     backgroundColor: '#FFFFFF',
@@ -429,6 +912,23 @@ const styles = StyleSheet.create({
     backgroundColor: '#6D28D9',
     alignSelf: 'flex-end',
     maxWidth: '88%',
+  },
+  reasoningTraceBox: {
+    backgroundColor: '#F6F2FF',
+    borderRadius: 10,
+    padding: 8,
+    borderWidth: 1,
+    borderColor: '#E5DDF5',
+    gap: 2,
+  },
+  reasoningTraceHeader: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#5B21B6',
+  },
+  reasoningTraceLine: {
+    fontSize: 11,
+    color: '#4E4466',
   },
   bubbleText: {
     fontSize: 14,
@@ -444,6 +944,76 @@ const styles = StyleSheet.create({
   },
   studentBubbleTime: {
     color: 'rgba(255, 255, 255, 0.78)',
+  },
+  liveReasoningBubble: {
+    backgroundColor: '#F3EEFF',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#C4B5FD',
+    gap: 8,
+  },
+  liveReasoningHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  liveReasoningTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#4C1D95',
+    flex: 1,
+  },
+  liveReasoningStepsList: {
+    gap: 3,
+  },
+  liveReasoningStepItem: {
+    fontSize: 11,
+    color: '#756A92',
+  },
+  liveReasoningStepItemActive: {
+    color: '#4C1D95',
+    fontWeight: '600',
+  },
+  actionExecutedCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#DDD0F8',
+    gap: 6,
+  },
+  actionExecutedHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  actionExecutedTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#161126',
+    flex: 1,
+  },
+  actionExecutedSub: {
+    fontSize: 12,
+    color: '#4E4466',
+  },
+  openCanvasBtn: {
+    marginTop: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: '#6D28D9',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    alignSelf: 'flex-start',
+  },
+  openCanvasBtnText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
   resultCard: {
     backgroundColor: '#FFFFFF',

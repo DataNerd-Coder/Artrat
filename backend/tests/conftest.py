@@ -28,7 +28,7 @@ def session():
         s.execute(
             text(
                 "truncate source, opportunity, portal_blueprint, university_semester,"
-                " research_task, site_state, research_direction,"
+                " research_task, site_state, research_direction, learned_signal,"
                 " student, vault_document, profile_fact, application, student_task,"
                 " evidence_ledger, application_package, application_approval, application_submission"
                 " cascade"
