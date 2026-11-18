@@ -35,6 +35,7 @@ import {
   INITIAL_VAULT_DOCUMENTS,
 } from './src/api/mockData';
 import {
+  sendChatToBackend,
   submitStudentLinkDrop,
   syncStudentProfileToBackend,
   syncVaultUploadToBackend,
@@ -637,6 +638,8 @@ export default function App() {
 
   // Send Message inside a Specific Application Chat
   const handleSendMessageInAppChat = (appId: string, message: string) => {
+    const replyTurnId = `turn-art-${Date.now() + 1}`;
+    const targetApp = applications.find((a) => a.id === appId);
     setApplications((prev) =>
       prev.map((app) => {
         if (app.id !== appId) return app;
@@ -651,7 +654,7 @@ export default function App() {
               timestamp: 'Just now',
             },
             {
-              id: `turn-art-${Date.now() + 1}`,
+              id: replyTurnId,
               sender: 'artrat',
               text: 'Got it—I updated your application accordingly.',
               timestamp: 'Just now',
@@ -660,6 +663,27 @@ export default function App() {
         };
       })
     );
+    void sendChatToBackend({
+      message,
+      output_format: 'text',
+      context: targetApp
+        ? `${targetApp.title} (${targetApp.portalUrl}) · Status: ${targetApp.statusSummary}`
+        : null,
+    }).then((res) => {
+      if (!res?.reply) return;
+      setApplications((prev) =>
+        prev.map((app) =>
+          app.id !== appId
+            ? app
+            : {
+                ...app,
+                chatTurns: app.chatTurns.map((t) =>
+                  t.id === replyTurnId ? { ...t, text: res.reply } : t
+                ),
+              }
+        )
+      );
+    });
   };
 
   // Process a scholarship link or message inside NewChatScreen -> Returns the created application (either Ready or Not Eligible 7-day wipe)

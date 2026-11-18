@@ -16,6 +16,7 @@ from artrat.integrations.bank_statement import (
     pull_on_request_bank_statement,
 )
 from artrat.integrations.google import GmailMessage
+from artrat.llm.gateway import GatewayError, MissingApiKey, OpenRouterGateway
 from artrat.platform.config import get_settings
 from artrat.platform.db import get_engine, session_scope
 from artrat.platform.urls import BlockedUrl, assert_public_http_url
@@ -79,6 +80,25 @@ class SubmitRequestIn(BaseModel):
     package_hash: str = Field(min_length=8)
     declaration_text: str = Field(min_length=5)
     inbox: list[GmailMsgIn] = Field(default_factory=list)
+
+
+class ChatRequestIn(BaseModel):
+    message: str = Field(min_length=1)
+    media_data_url: str | None = None
+    audio_data_url: str | None = None
+    output_format: Literal["text", "json", "audio"] = "text"
+    context: str | None = None
+
+
+class ChatResponseOut(BaseModel):
+    reply: str
+    output_format: Literal["text", "json", "audio"]
+    reasoning_model: str
+    media_model_used: str | None = None
+    audio_model_used: str | None = None
+    media_extracted: str | None = None
+    audio_transcribed: str | None = None
+    audio_output: str | None = None
 
 
 @asynccontextmanager
@@ -423,3 +443,26 @@ def declare_and_submit_endpoint(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except (submission.StalePackageHashError, submission.ReadinessIncompleteError) as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+
+@app.post("/v1/chat", response_model=ChatResponseOut)
+def chat_endpoint(body: ChatRequestIn) -> ChatResponseOut:
+    """Multimodal student chat endpoint:
+    - `baidu/ernie-5.5-flash-preview:free` for text and core reasoning across all inputs
+    - `nvidia/nemotron-3.5-super-vl:free` (`super vl`) for media inputs
+    - `fish-audio/s2.1-pro-free:free` for audio inputs/outputs
+    """
+    try:
+        gateway = OpenRouterGateway(get_settings())
+        result = gateway.chat(
+            message=body.message,
+            media_data_url=body.media_data_url,
+            audio_data_url=body.audio_data_url,
+            output_format=body.output_format,
+            context=body.context,
+        )
+        return ChatResponseOut.model_validate(result)
+    except MissingApiKey as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except GatewayError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc

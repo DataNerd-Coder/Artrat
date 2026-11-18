@@ -499,3 +499,180 @@ class OpenRouterGateway:
             auth_steps=tuple(auth_steps),
             automation_policy=base.automation_policy,
         )
+
+    def _call_model_text(
+        self,
+        *,
+        model: str,
+        fallback_models: list[str],
+        messages: list[dict],
+        json_mode: bool = False,
+    ) -> str:
+        self.budget.check_available()
+        api_key = require_api_key(self.settings)
+        payload: dict = {
+            "model": model,
+            "models": fallback_models,
+            "temperature": 0.2 if not json_mode else 0.0,
+            "messages": messages,
+        }
+        if json_mode:
+            payload["response_format"] = {"type": "json_object"}
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://artrat.app",
+            "X-Title": "Artrat Multimodal Chat",
+        }
+        url = f"{self.settings.openrouter_base_url.rstrip('/')}/chat/completions"
+        try:
+            with httpx.Client(
+                transport=self._transport, timeout=self.settings.fetch_timeout_seconds
+            ) as client:
+                response = client.post(url, headers=headers, json=payload)
+        except httpx.HTTPError as exc:
+            raise GatewayError(f"OpenRouter chat request failed: {exc}") from exc
+        if response.status_code != 200:
+            raise GatewayError(
+                f"OpenRouter chat returned {response.status_code}: {response.text[:200]}"
+            )
+        body = response.json()
+        usage = body.get("usage") or {}
+        total_tokens = int(usage.get("total_tokens") or 0)
+        total_cost = float(usage.get("cost") or 0.0)
+        self.budget.record(total_tokens, total_cost)
+        try:
+            return str(body["choices"][0]["message"]["content"] or "").strip()
+        except (KeyError, IndexError, TypeError) as exc:
+            raise GatewayError(f"OpenRouter chat returned malformed response: {exc}") from exc
+
+    def chat(
+        self,
+        *,
+        message: str,
+        media_data_url: str | None = None,
+        audio_data_url: str | None = None,
+        output_format: str = "text",
+        context: str | None = None,
+    ) -> dict:
+        """Multimodal chat pipeline:
+        - Media inputs (`media_data_url`) are parsed via `openrouter_chat_media_model`
+          (`nvidia/nemotron-3.5-super-vl:free`).
+        - Audio inputs/outputs (`audio_data_url` or `output_format == 'audio'`) use
+          `openrouter_chat_audio_model` (`fish-audio/s2.1-pro-free:free`).
+        - Core reasoning for all inputs always runs on `openrouter_chat_text_model`
+          (`baidu/ernie-5.5-flash-preview:free`) formatted per `output_format` ('text'|'json'|'audio').
+        """
+        media_summary: str | None = None
+        if media_data_url:
+            media_summary = self._call_model_text(
+                model=self.settings.openrouter_chat_media_model,
+                fallback_models=[
+                    self.settings.openrouter_chat_media_model,
+                    self.settings.openrouter_vision_model,
+                ],
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": (
+                                    "Extract all visible text, document fields, requirements, "
+                                    "and details from this media input for Artrat's reasoning engine."
+                                ),
+                            },
+                            {"type": "image_url", "image_url": {"url": media_data_url}},
+                        ],
+                    }
+                ],
+            )
+
+        audio_transcript: str | None = None
+        if audio_data_url:
+            audio_transcript = self._call_model_text(
+                model=self.settings.openrouter_chat_audio_model,
+                fallback_models=[
+                    self.settings.openrouter_chat_audio_model,
+                    self.settings.openrouter_chat_text_model,
+                ],
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": "Transcribe and extract the student's spoken request from this audio input.",
+                            },
+                            {"type": "input_audio", "input_audio": {"data": audio_data_url, "format": "wav"}},
+                        ],
+                    }
+                ],
+            )
+
+        reasoning_parts = [f"Student message: {message}"]
+        if context:
+            reasoning_parts.append(f"Application / Vault context:\n{context}")
+        if media_summary:
+            reasoning_parts.append(
+                f"Extracted Media Input ({self.settings.openrouter_chat_media_model}):\n{media_summary}"
+            )
+        if audio_transcript:
+            reasoning_parts.append(
+                f"Transcribed Audio Input ({self.settings.openrouter_chat_audio_model}):\n{audio_transcript}"
+            )
+
+        sys_prompt = (
+            "You are Artrat, an autonomous scholarship application assistant for Nigerian students. "
+            "Never fabricate academic claims, grades, or documents; ground every answer in the student's "
+            "verified Vault and official portal dry-run blueprints."
+        )
+        if output_format == "json":
+            sys_prompt += " Respond strictly with a valid JSON object."
+        elif output_format == "audio":
+            sys_prompt += " Write a clear, natural spoken response suitable for audio synthesis."
+
+        reasoned_reply = self._call_model_text(
+            model=self.settings.openrouter_chat_text_model,
+            fallback_models=[
+                self.settings.openrouter_chat_text_model,
+                self.settings.openrouter_model,
+            ],
+            messages=[
+                {"role": "system", "content": sys_prompt},
+                {"role": "user", "content": "\n\n".join(reasoning_parts)},
+            ],
+            json_mode=(output_format == "json"),
+        )
+
+        audio_output: str | None = None
+        if output_format == "audio":
+            audio_output = self._call_model_text(
+                model=self.settings.openrouter_chat_audio_model,
+                fallback_models=[
+                    self.settings.openrouter_chat_audio_model,
+                    self.settings.openrouter_chat_text_model,
+                ],
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "Synthesize spoken audio output for the following reasoned response.",
+                    },
+                    {"role": "user", "content": reasoned_reply},
+                ],
+            )
+
+        return {
+            "reply": reasoned_reply,
+            "output_format": output_format,
+            "reasoning_model": self.settings.openrouter_chat_text_model,
+            "media_model_used": self.settings.openrouter_chat_media_model if media_data_url else None,
+            "audio_model_used": (
+                self.settings.openrouter_chat_audio_model
+                if (audio_data_url or output_format == "audio")
+                else None
+            ),
+            "media_extracted": media_summary,
+            "audio_transcribed": audio_transcript,
+            "audio_output": audio_output,
+        }

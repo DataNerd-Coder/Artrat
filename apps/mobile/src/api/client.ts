@@ -113,3 +113,27 @@ export async function syncVaultUploadToBackend(
     body: JSON.stringify({ ...payload, extracted_facts: [] }),
   });
 }
+
+export interface BackendChatResponse {
+  reply: string;
+  output_format: 'text' | 'json' | 'audio';
+  reasoning_model: string;
+  media_model_used?: string | null;
+  audio_model_used?: string | null;
+  media_extracted?: string | null;
+  audio_transcribed?: string | null;
+  audio_output?: string | null;
+}
+
+export async function sendChatToBackend(payload: {
+  message: string;
+  media_data_url?: string | null;
+  audio_data_url?: string | null;
+  output_format?: 'text' | 'json' | 'audio';
+  context?: string | null;
+}): Promise<BackendChatResponse | null> {
+  return requestJson<BackendChatResponse>('/v1/chat', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}

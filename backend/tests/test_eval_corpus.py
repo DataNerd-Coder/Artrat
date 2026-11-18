@@ -324,12 +324,57 @@ def test_openrouter_api_key_is_always_required():
     defaults = Settings(database_url="unused", openrouter_api_key="sk-or-test")
     assert defaults.openrouter_model == "nvidia/nemotron-3-ultra-550b-a55b:free"
     assert defaults.openrouter_vision_model == "nvidia/nemotron-3.5-super-vl:free"
+    assert defaults.openrouter_chat_text_model == "baidu/ernie-5.5-flash-preview:free"
+    assert defaults.openrouter_chat_media_model == "nvidia/nemotron-3.5-super-vl:free"
+    assert defaults.openrouter_chat_audio_model == "fish-audio/s2.1-pro-free:free"
 
     with pytest.raises(MissingApiKey, match="ARTRAT_OPENROUTER_API_KEY"):
         OpenRouterGateway(Settings(database_url="unused", openrouter_api_key=""))
 
     with pytest.raises(MissingApiKey, match="ARTRAT_OPENROUTER_API_KEY"):
         agent.default_runtime(Settings(database_url="unused", openrouter_api_key="   "))
+
+
+def test_multimodal_chat_routes_media_and_audio_with_ernie_core_reasoning():
+    called_models: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        body = json.loads(request.content.decode())
+        model = body["model"]
+        called_models.append(model)
+        if model == "nvidia/nemotron-3.5-super-vl:free":
+            txt = "Extracted media: UNN 200L Transcript CGPA 4.21"
+        elif model == "fish-audio/s2.1-pro-free:free":
+            txt = "Audio: Do I qualify for NNPC/SNEPCo?"
+        else:
+            txt = '{"qualified": true, "reason": "CGPA 4.21 >= 3.50"}'
+        return httpx.Response(
+            200,
+            json={
+                "choices": [{"message": {"content": txt}}],
+                "usage": {"total_tokens": 25, "cost": 0.0},
+            },
+        )
+
+    gw = OpenRouterGateway(
+        Settings(database_url="unused", openrouter_api_key="sk-or-test"),
+        transport=httpx.MockTransport(handler),
+    )
+    out = gw.chat(
+        message="Check my transcript and voice note",
+        media_data_url="data:image/png;base64,iVBORw0KGgo=",
+        audio_data_url="UklGRiQAAABXQVZFZm10IBAAAAABAAEA",
+        output_format="json",
+    )
+    assert called_models == [
+        "nvidia/nemotron-3.5-super-vl:free",
+        "fish-audio/s2.1-pro-free:free",
+        "baidu/ernie-5.5-flash-preview:free",
+    ]
+    assert out["reasoning_model"] == "baidu/ernie-5.5-flash-preview:free"
+    assert out["media_model_used"] == "nvidia/nemotron-3.5-super-vl:free"
+    assert out["audio_model_used"] == "fish-audio/s2.1-pro-free:free"
+    assert out["output_format"] == "json"
 
 
 def test_openrouter_budget_guardrail_stops_when_limit_reached(session):
