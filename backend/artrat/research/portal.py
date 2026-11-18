@@ -67,6 +67,24 @@ def inspect_portal_snapshot(
         if ban_line is None and AUTOMATION_BAN_RE.search(ln):
             ban_line = ln
 
+        if ln.startswith("Form Control [") and "]:" in ln:
+            meta, raw_lbl = ln.removeprefix("Form Control [").split("]:", 1)
+            c_type = meta.split(",")[0].strip().lower()
+            req = "optional" not in meta.lower()
+            c_lbl = raw_lbl.strip()
+            c_name = re.sub(r"[^a-z0-9]+", "_", c_lbl.lower()).strip("_")[:64]
+            if c_name and c_name not in ("search_the_site", "query", "q") and not any(
+                f.name == c_name for f in fields
+            ):
+                fields.append(
+                    PortalFieldSpec(
+                        name=c_name,
+                        label=c_lbl[:160],
+                        field_type=c_type,
+                        required=req,
+                    )
+                )
+
         if ("full name" in low or "applicant name" in low or "personal" in low) and not any(
             f.name == "full_name" for f in fields
         ):
@@ -174,17 +192,19 @@ def inspect_portal_snapshot(
 
         for phrase, role, label in (
             ("hod", SignerRole.HOD, "HOD Attestation / Endorsement Letter"),
-            ("head of department", SignerRole.HOD, "HOD Attestation / Endorsement Letter"),
+            ("head of department", SignerRole.HOD, "HOD Signed Profile / Attestation"),
             ("academic referee", SignerRole.ACADEMIC_REFEREE, "Academic Referee Letter"),
             ("referee", SignerRole.ACADEMIC_REFEREE, "Academic Referee / Reference Letter"),
+            ("prospective supervisor", SignerRole.ACADEMIC_REFEREE, "Prospective Supervisor Consent"),
             ("supervisor", SignerRole.ACADEMIC_REFEREE, "Academic Supervisor Support Letter"),
             ("traditional ruler", SignerRole.COMMUNITY_LEADER, "Traditional Ruler / Community Leader Attestation"),
+            ("government official declaration", SignerRole.GUARANTOR, "Government Official Declaration Form"),
             ("mentor", SignerRole.MENTOR, "Mentor Recommendation Letter"),
             ("guarantor", SignerRole.GUARANTOR, "Guarantor Endorsement Form"),
             ("clergy", SignerRole.CLERGY, "Clergy Attestation Letter"),
         ):
             if phrase in low and any(
-                w in low for w in ("letter", "endorsement", "reference", "attestation", "statement", "support")
+                w in low for w in ("letter", "endorsement", "reference", "attestation", "statement", "support", "sign", "consent", "form")
             ):
                 add_upload(
                     f"endorsement_{role.value}",

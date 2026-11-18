@@ -38,7 +38,27 @@ log = logging.getLogger("artrat.agent")
 CHILD_PRIORITY_DECAY = 0.8
 LINK_DROP_PRIORITY = 10.0
 
+AGGREGATOR_HOSTS = (
+    "icanstudent.com",
+    "scholarshipregion.com",
+    "scholarsregion.com",
+    "myschoolgist.com",
+    "afterschoolafrica.com",
+    "opportunitiesforafricans.com",
+    "scholarsworld.ng",
+    "scholarshipright.com",
+    "brainsbeyondboders.org",
+    "prideriseglobal.com",
+)
+
 Fetch = Callable[..., Retrieved]
+PortalInspector = Callable[[str, catalogue.SourceSnapshotOut], catalogue.PortalBlueprintDraft]
+PortalNavigator = Callable[..., dict]
+
+
+def _is_aggregator_url(url: str) -> bool:
+    low = url.lower()
+    return any(h in low for h in AGGREGATOR_HOSTS)
 
 
 @dataclass
@@ -50,6 +70,8 @@ class Runtime:
     rendered: Fetch = fetch_rendered
     proposer: Proposer = default_propose
     search: Searcher = searxng_search
+    portal_inspector: PortalInspector = inspect_portal_snapshot
+    portal_navigator: PortalNavigator | None = None
 
 
 def default_runtime(settings: Settings) -> Runtime:
@@ -63,6 +85,8 @@ def default_runtime(settings: Settings) -> Runtime:
         settings=settings,
         robots=RobotsCache(get_robots, settings.robots_agent),
         proposer=gateway.propose,
+        portal_inspector=gateway.inspect_portal_blueprint,
+        portal_navigator=gateway.decide_next_portal_step,
     )
 
 
@@ -279,50 +303,121 @@ def _handle_extract(rt: Runtime, task: frontier.ClaimedTask) -> None:
         )
 
 
+def _fetch_portal_page(rt: Runtime, url: str) -> Retrieved:
+    try:
+        got = rt.static(url, rt.settings, guard=rt.guard)
+    except FetchFailed:
+        if rt.settings.render_thin_pages:
+            got = rt.rendered(url, rt.settings, guard=rt.guard)
+        else:
+            raise
+    if len(got.snapshot.text) < rt.settings.thin_text_chars and rt.settings.render_thin_pages:
+        got = rt.rendered(url, rt.settings, guard=rt.guard)
+    return got
+
+
 def _handle_inspect_portal(rt: Runtime, task: frontier.ClaimedTask) -> None:
     if not rt.robots.allowed(task.url):
         with session_scope() as session:
             frontier.skip(session, task, "disallowed by robots.txt")
         return
 
-    try:
-        got = rt.static(task.url, rt.settings, guard=rt.guard)
-    except FetchFailed:
-        if rt.settings.render_thin_pages:
-            got = rt.rendered(task.url, rt.settings, guard=rt.guard)
-        else:
-            raise
-    if len(got.snapshot.text) < rt.settings.thin_text_chars and rt.settings.render_thin_pages:
-        got = rt.rendered(task.url, rt.settings, guard=rt.guard)
+    got = _fetch_portal_page(rt, task.url)
 
-    # If the portal landing page itself links out to an online form (e.g. forms.gle / Google Forms),
-    # inspect that form hop as well and combine the snapshot text so both requirements and live form
-    # auth/controls are captured in the PortalBlueprint.
-    for ln in got.snapshot.text.splitlines():
-        if ln.startswith("Apply at http"):
-            hop_url = ln.removeprefix("Apply at ").strip()
-            if hop_url != task.url and hop_url != got.snapshot.final_url and rt.robots.allowed(hop_url):
+    # Step 1: If we started on an aggregator blog, use AI navigation + outbound links + search to
+    # hop to the real official portal and DISCARD the blog snapshot text so dry-run requirements
+    # come strictly from the official portal/form.
+    if _is_aggregator_url(got.snapshot.final_url):
+        target_official_url: str | None = None
+        search_query: str | None = None
+        if rt.portal_navigator is not None:
+            try:
+                plan = rt.portal_navigator(
+                    current_url=got.snapshot.final_url,
+                    page_text=got.snapshot.text,
+                    links=[(lnk.anchor, lnk.url) for lnk in got.links],
+                )
+                candidate = plan.get("target_url")
+                if isinstance(candidate, str) and candidate.startswith("http") and not _is_aggregator_url(candidate):
+                    target_official_url = candidate
+                q = plan.get("official_search_query")
+                if isinstance(q, str) and q.strip():
+                    search_query = q.strip()
+            except RuntimeError as exc:
+                log.debug("portal navigator fallback: %s", exc)
+        if target_official_url is None:
+            for ln in got.snapshot.text.splitlines():
+                if ln.startswith("Apply at http"):
+                    hop_url = ln.removeprefix("Apply at ").strip()
+                    if not _is_aggregator_url(hop_url):
+                        target_official_url = hop_url
+                        break
+        if target_official_url is None and search_query:
+            try:
+                for lead in rt.search(search_query, rt.settings):
+                    if not _is_aggregator_url(lead.url) and rt.robots.allowed(lead.url):
+                        target_official_url = lead.url
+                        break
+            except RuntimeError as exc:
+                log.debug("official portal search fallback: %s", exc)
+        if target_official_url and rt.robots.allowed(target_official_url):
+            try:
+                # Replace `got` completely: zero blog text is kept.
+                got = _fetch_portal_page(rt, target_official_url)
+            except (BlockedUrl, FetchFailed):
+                pass
+
+    # Step 2: On the official portal, follow any official downloadable .docm/.docx application forms,
+    # candidate registration routes (/candidate/register), or online form links (forms.gle / Google Forms).
+    if not _is_aggregator_url(got.snapshot.final_url):
+        extra_sections: list[str] = []
+        final_portal_url = got.snapshot.final_url
+        doc_links = [
+            lnk.url
+            for lnk in got.links
+            if lnk.url.lower().endswith((".docm", ".docx"))
+            or "/candidate/register" in lnk.url.lower()
+        ]
+        for doc_url in dict.fromkeys(doc_links):
+            if rt.robots.allowed(doc_url):
                 try:
-                    hop_got = rt.static(hop_url, rt.settings, guard=rt.guard)
-                    combined_text = (
-                        f"{got.snapshot.text}\n--- Destination Form ({hop_got.snapshot.final_url}) ---\n"
-                        f"{hop_got.snapshot.text}"
+                    doc_got = rt.static(doc_url, rt.settings, guard=rt.guard)
+                    extra_sections.append(
+                        f"--- Official Form ({doc_got.snapshot.final_url}) ---\n{doc_got.snapshot.text}"
                     )
-                    got = Retrieved(
-                        snapshot=catalogue.SnapshotIn(
-                            url=got.snapshot.url,
-                            final_url=hop_got.snapshot.final_url,
-                            status_code=hop_got.snapshot.status_code,
-                            fetch_mode=got.snapshot.fetch_mode,
-                            title=hop_got.snapshot.title or got.snapshot.title,
-                            text=combined_text,
-                            retrieved_at=hop_got.snapshot.retrieved_at,
-                        ),
-                        links=got.links + hop_got.links,
-                    )
-                    break
                 except (BlockedUrl, FetchFailed):
                     continue
+        for ln in got.snapshot.text.splitlines():
+            if ln.startswith("Apply at http"):
+                hop_url = ln.removeprefix("Apply at ").strip()
+                if (
+                    hop_url != got.snapshot.url
+                    and hop_url != got.snapshot.final_url
+                    and not _is_aggregator_url(hop_url)
+                    and rt.robots.allowed(hop_url)
+                ):
+                    try:
+                        hop_got = _fetch_portal_page(rt, hop_url)
+                        final_portal_url = hop_got.snapshot.final_url
+                        extra_sections.append(
+                            f"--- Destination Form ({hop_got.snapshot.final_url}) ---\n{hop_got.snapshot.text}"
+                        )
+                        break
+                    except (BlockedUrl, FetchFailed):
+                        continue
+        if extra_sections:
+            got = Retrieved(
+                snapshot=catalogue.SnapshotIn(
+                    url=got.snapshot.url,
+                    final_url=final_portal_url,
+                    status_code=got.snapshot.status_code,
+                    fetch_mode=got.snapshot.fetch_mode,
+                    title=got.snapshot.title,
+                    text=got.snapshot.text + "\n" + "\n".join(extra_sections),
+                    retrieved_at=got.snapshot.retrieved_at,
+                ),
+                links=got.links,
+            )
 
     slug = task.payload["opportunity_slug"]
     direction_slug = task.payload.get("direction_slug")
@@ -330,7 +425,7 @@ def _handle_inspect_portal(rt: Runtime, task: frontier.ClaimedTask) -> None:
         before = catalogue.get_opportunity(session, slug).status
         source = catalogue.store_snapshot(session, got.snapshot)
         full_source = catalogue.get_source(session, source.id)
-        blueprint_draft = inspect_portal_snapshot(slug, full_source)
+        blueprint_draft = rt.portal_inspector(slug, full_source)
         bp = catalogue.record_portal_blueprint(session, blueprint_draft)
         after = catalogue.get_opportunity(session, slug).status
         if (

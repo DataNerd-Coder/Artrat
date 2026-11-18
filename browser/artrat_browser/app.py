@@ -7,12 +7,13 @@ fresh, throwaway browser so no cookies or sessions cross jobs (docs/03 browser-w
 
 import asyncio
 import ipaddress
+import json
 import os
 import shutil
 import socket
 import tempfile
 from datetime import UTC, datetime
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, unquote, urlsplit
 
 os.environ.setdefault("ANONYMIZED_TELEMETRY", "false")
 os.environ.setdefault("BROWSER_USE_CLOUD_SYNC", "false")
@@ -88,9 +89,11 @@ class RenderResult(BaseModel):
 
 
 def _profile(user_data_dir: str) -> BrowserProfile:
+    storage_state = os.environ.get("ARTRAT_GOOGLE_STORAGE_STATE") or None
     return BrowserProfile(
         headless=True,
         user_data_dir=user_data_dir,
+        storage_state=storage_state if storage_state and os.path.exists(storage_state) else None,
         executable_path=os.environ.get("ARTRAT_BROWSER_EXECUTABLE") or None,
         block_ip_addresses=True,  # no navigation to raw IPs, so redirects cannot reach internal hosts
         captcha_solver=True,
@@ -101,6 +104,20 @@ def _profile(user_data_dir: str) -> BrowserProfile:
         highlight_elements=False,
         keep_alive=False,
     )
+
+
+def _unwrap_google_continue_url(final_url: str) -> str:
+    """When a Google Form with file-upload fields redirects an unauthenticated session to
+    accounts.google.com/v3/signin/identifier?continue=<form_url>, extract the canonical form URL."""
+    parts = urlsplit(final_url)
+    if parts.hostname and parts.hostname.endswith("accounts.google.com"):
+        qs = parse_qs(parts.query)
+        for key in ("continue", "followup"):
+            if qs.get(key):
+                candidate = unquote(qs[key][0])
+                if candidate.startswith("https://docs.google.com/forms/"):
+                    return candidate.split("?")[0]
+    return final_url
 
 
 async def _remove_profile(path: str) -> None:
@@ -123,7 +140,9 @@ async def render(url: str, *, include_controls: bool = False) -> RenderResult:
             await session.start()
             await session.navigate_to(url)
             page = await session.must_get_current_page()
-            final_url = await session.get_current_page_url()
+            raw_final_url = await session.get_current_page_url()
+            assert_public_http_url(raw_final_url)
+            final_url = _unwrap_google_continue_url(raw_final_url)
             assert_public_http_url(final_url)
             html = await page.evaluate("() => document.documentElement.outerHTML")
             title = await session.get_current_page_title()
@@ -132,6 +151,11 @@ async def render(url: str, *, include_controls: bool = False) -> RenderResult:
             await session.kill()
     finally:
         await _remove_profile(user_data_dir)
+    if isinstance(raw_controls, str):
+        try:
+            raw_controls = json.loads(raw_controls)
+        except json.JSONDecodeError:
+            raw_controls = []
     controls = [DomControl.model_validate(c) for c in (raw_controls or [])]
     return RenderResult(
         final_url=final_url,

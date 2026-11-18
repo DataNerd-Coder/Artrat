@@ -5,9 +5,12 @@ browser worker (browser/), which drives a real browser with browser-use. Both pa
 same Retrieved shape so the rest of the agent never cares how a page was retrieved.
 """
 
+import io
+import xml.etree.ElementTree as ET
+import zipfile
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from urllib.parse import urljoin
+from urllib.parse import parse_qs, unquote, urljoin, urlsplit
 
 import httpx
 from scrapling.fetchers import Fetcher
@@ -128,13 +131,49 @@ def http_get(url: str, settings: Settings, *, guard=assert_public_http_url):
         body = response.body
         if len(body) > settings.max_snapshot_bytes:
             raise FetchFailed(f"{url} exceeds {settings.max_snapshot_bytes} bytes", retryable=False)
+        if body.startswith(b"PK\x03\x04"):
+            try:
+                with zipfile.ZipFile(io.BytesIO(body)) as zf:
+                    if "word/document.xml" in zf.namelist():
+                        root = ET.fromstring(zf.read("word/document.xml"))
+                        paragraphs: list[str] = []
+                        for p in root.iter():
+                            if p.tag.endswith("}p"):
+                                runs = [
+                                    t.text
+                                    for t in p.iter()
+                                    if t.tag.endswith("}t") and t.text
+                                ]
+                                line = "".join(runs).strip()
+                                if line:
+                                    paragraphs.append(line)
+                        doc_html = (
+                            f"<html><head><title>{current.rsplit('/', 1)[-1]}</title></head>"
+                            f"<body><pre>{chr(10).join(paragraphs)}</pre></body></html>"
+                        )
+                        return current, response.status, doc_html
+            except (zipfile.BadZipFile, ET.ParseError):
+                pass
         return current, response.status, body.decode(response.encoding or "utf-8", errors="replace")
     raise FetchFailed(f"{url} redirected more than {MAX_REDIRECTS} times", retryable=False)
 
 
+def _unwrap_google_continue_url(final_url: str) -> str:
+    parts = urlsplit(final_url)
+    if parts.hostname and parts.hostname.endswith("accounts.google.com"):
+        qs = parse_qs(parts.query)
+        for key in ("continue", "followup"):
+            if qs.get(key):
+                candidate = unquote(qs[key][0])
+                if candidate.startswith("https://docs.google.com/forms/"):
+                    return candidate.split("?")[0]
+    return final_url
+
+
 def fetch_static(url: str, settings: Settings, *, guard=assert_public_http_url) -> Retrieved:
-    final_url, status, html = http_get(url, settings, guard=guard)
+    raw_final_url, status, html = http_get(url, settings, guard=guard)
     _check_status(url, status)
+    final_url = _unwrap_google_continue_url(raw_final_url)
     page = parse_page(html, final_url)
     snapshot = SnapshotIn(
         url=url,
@@ -149,11 +188,11 @@ def fetch_static(url: str, settings: Settings, *, guard=assert_public_http_url) 
 
 
 def fetch_rendered(url: str, settings: Settings, *, guard=assert_public_http_url) -> Retrieved:
-    """Ask the browser worker to render the page; it applies the same guard on its side."""
+    """Ask the browser worker to render & inspect the page; it applies the same guard on its side."""
     guard(url)
     try:
         response = httpx.post(
-            f"{settings.browser_url}/render",
+            f"{settings.browser_url}/inspect",
             json={"url": url},
             timeout=settings.fetch_timeout_seconds + 30,
         )
@@ -166,13 +205,28 @@ def fetch_rendered(url: str, settings: Settings, *, guard=assert_public_http_url
     data = response.json()
     guard(data["final_url"])
     page = parse_page(data["html"], data["final_url"])
+    dom_ctrl_lines: list[str] = []
+    for ctrl in data.get("controls") or []:
+        if isinstance(ctrl, dict):
+            c_type = (ctrl.get("input_type") or ctrl.get("tag") or "text").lower()
+            if c_type in ("hidden", "submit", "button", "reset", "image"):
+                continue
+            c_label = (ctrl.get("label") or ctrl.get("name") or "").strip()
+            if c_label:
+                req = "required" if ctrl.get("required") else "optional"
+                dom_ctrl_lines.append(f"Form Control [{c_type}, {req}]: {c_label}")
+    full_text = page.text
+    if dom_ctrl_lines:
+        new_lines = [ln for ln in dict.fromkeys(dom_ctrl_lines) if ln not in full_text]
+        if new_lines:
+            full_text = full_text + "\n" + "\n".join(new_lines)
     snapshot = SnapshotIn(
         url=url,
         final_url=data["final_url"],
         status_code=200,
         fetch_mode=FetchMode.RENDERED,
         title=page.title or data.get("title"),
-        text=page.text,
+        text=full_text,
         retrieved_at=datetime.fromisoformat(data["retrieved_at"]),
     )
     return Retrieved(snapshot=snapshot, links=page.links)
