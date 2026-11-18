@@ -30,6 +30,11 @@ Thumbs.db
 # Agent scratch & local telemetry
 .gemini/
 
+# Environment secrets (never commit filled .env files)
+.env
+*.env
+!.env.example
+
 # Python (backend/, browser/)
 .venv/
 __pycache__/

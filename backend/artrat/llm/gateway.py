@@ -123,6 +123,10 @@ class OpenRouterGateway:
         )
         payload = {
             "model": self.settings.openrouter_model,
+            "models": [
+                self.settings.openrouter_model,
+                self.settings.openrouter_vision_model,
+            ],
             "temperature": 0.0,
             "response_format": {"type": "json_object"},
             "messages": [
@@ -207,3 +211,63 @@ class OpenRouterGateway:
                 )
             )
         return proposals
+
+    def extract_vision_document(
+        self,
+        *,
+        doc_type: str,
+        image_or_pdf_data_url: str,
+        prompt: str = "Extract all academic fields, grades, scores, and identifiers as JSON.",
+    ) -> dict:
+        """Call OpenRouter's Vision model (`openrouter_vision_model` = nvidia/nemotron-3.5-super-vl:free)
+        for student Vault OCR extraction (docs/03, docs/09 §4)."""
+        self.budget.check_available()
+        api_key = require_api_key(self.settings)
+        payload = {
+            "model": self.settings.openrouter_vision_model,
+            "models": [
+                self.settings.openrouter_vision_model,
+                self.settings.openrouter_model,
+            ],
+            "temperature": 0.0,
+            "response_format": {"type": "json_object"},
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": f"Document type: {doc_type}. {prompt}"},
+                        {"type": "image_url", "image_url": {"url": image_or_pdf_data_url}},
+                    ],
+                }
+            ],
+        }
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://artrat.app",
+            "X-Title": "Artrat Vision Vault OCR",
+        }
+        url = f"{self.settings.openrouter_base_url.rstrip('/')}/chat/completions"
+        try:
+            with httpx.Client(
+                transport=self._transport, timeout=self.settings.fetch_timeout_seconds
+            ) as client:
+                response = client.post(url, headers=headers, json=payload)
+        except httpx.HTTPError as exc:
+            raise GatewayError(f"OpenRouter vision request failed: {exc}") from exc
+
+        if response.status_code != 200:
+            raise GatewayError(
+                f"OpenRouter vision returned {response.status_code}: {response.text[:200]}"
+            )
+
+        body = response.json()
+        usage = body.get("usage") or {}
+        total_tokens = int(usage.get("total_tokens") or 0)
+        total_cost = float(usage.get("cost") or 0.0)
+        self.budget.record(total_tokens, total_cost)
+        try:
+            raw_content = body["choices"][0]["message"]["content"]
+            return json.loads(raw_content)
+        except (KeyError, IndexError, TypeError, json.JSONDecodeError) as exc:
+            raise GatewayError(f"OpenRouter vision returned malformed JSON: {exc}") from exc

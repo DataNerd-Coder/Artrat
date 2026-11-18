@@ -321,6 +321,10 @@ CORPUS: tuple[CorpusItem, ...] = (
 
 
 def test_openrouter_api_key_is_always_required():
+    defaults = Settings(database_url="unused", openrouter_api_key="sk-or-test")
+    assert defaults.openrouter_model == "nvidia/nemotron-3-ultra-550b-a55b:free"
+    assert defaults.openrouter_vision_model == "nvidia/nemotron-3.5-super-vl:free"
+
     with pytest.raises(MissingApiKey, match="ARTRAT_OPENROUTER_API_KEY"):
         OpenRouterGateway(Settings(database_url="unused", openrouter_api_key=""))
 

@@ -14,7 +14,8 @@ class Settings(BaseSettings):
     searxng_url: str = "http://localhost:8080"
     openrouter_api_key: str = ""
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
-    openrouter_model: str = "google/gemini-2.5-flash"
+    openrouter_model: str = "nvidia/nemotron-3-ultra-550b-a55b:free"
+    openrouter_vision_model: str = "nvidia/nemotron-3.5-super-vl:free"
     max_tokens_per_cycle: int = 200_000
     max_cost_usd_per_cycle: float = 2.0
 
