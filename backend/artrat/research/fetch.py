@@ -48,20 +48,57 @@ class ParsedPage:
     links: list[Link]
 
 
+APPLY_ANCHOR_TERMS = (
+    "apply now",
+    "apply here",
+    "click here to apply",
+    "application form",
+    "online application",
+    "application portal",
+    "official page",
+    "official website",
+    "read how to apply",
+)
+
+
 def parse_page(html: str, base_url: str) -> ParsedPage:
     """Title, visible text (scripts and styles removed) and absolute links of an HTML document."""
     page = Selector(html)
     title = page.css("title::text").get()
     links = []
+    outbound_apply_lines: list[str] = []
     for a in page.css("a[href]"):
         href = (a.attrib.get("href") or "").strip()
         if href and not href.startswith(("#", "javascript:", "mailto:", "tel:")):
             anchor = " ".join(str(a.get_all_text(separator=" ", strip=True)).split())
-            links.append(Link(url=urljoin(base_url, href), anchor=anchor))
+            resolved = urljoin(base_url, href)
+            links.append(Link(url=resolved, anchor=anchor))
+            low_anchor = anchor.lower()
+            if any(t in low_anchor for t in APPLY_ANCHOR_TERMS) and resolved.startswith(
+                ("http://", "https://")
+            ):
+                outbound_apply_lines.append(f"Apply at {resolved}")
+    control_lines: list[str] = []
+    for ctrl in page.css("input, select, textarea"):
+        c_type = (ctrl.attrib.get("type") or ctrl.tag or "text").lower()
+        if c_type in ("hidden", "submit", "button", "reset", "image"):
+            continue
+        c_label = (
+            ctrl.attrib.get("aria-label")
+            or ctrl.attrib.get("placeholder")
+            or ctrl.attrib.get("name")
+            or ctrl.attrib.get("id")
+            or ""
+        ).strip()
+        if c_label:
+            control_lines.append(f"Form Control [{c_type}]: {c_label}")
     for node in page.css("script, style, noscript, template"):
         node._root.getparent().remove(node._root)
-    text = page.get_all_text(separator="\n", strip=True)
-    return ParsedPage(title=title.strip() if title else None, text=str(text), links=links)
+    text = str(page.get_all_text(separator="\n", strip=True))
+    extras = list(dict.fromkeys(control_lines + outbound_apply_lines))
+    if extras:
+        text = text + "\n" + "\n".join(extras)
+    return ParsedPage(title=title.strip() if title else None, text=text, links=links)
 
 
 def _check_status(url: str, status: int) -> None:

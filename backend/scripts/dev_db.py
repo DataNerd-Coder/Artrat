@@ -20,7 +20,10 @@ def _free_port() -> int:
 
 def _cluster_state() -> str:
     out = subprocess.run(
-        [str(PG_BIN / "pg_controldata.exe"), "-D", str(DATA)], capture_output=True, text=True
+        [str(PG_BIN / "pg_controldata.exe"), "-D", str(DATA)],
+        capture_output=True,
+        text=True,
+        check=False,
     ).stdout
     for line in out.splitlines():
         if line.startswith("Database cluster state:"):
@@ -34,20 +37,28 @@ def recover_after_unclean_shutdown() -> None:
     once with the log outside the data dir, then stop cleanly."""
     if not DATA.exists() or not PG_CTL.exists() or _cluster_state() == "shut down":
         return
-    status = subprocess.run([str(PG_CTL), "-D", str(DATA), "status"], capture_output=True)
+    status = subprocess.run(
+        [str(PG_CTL), "-D", str(DATA), "status"], capture_output=True, check=False
+    )
     if status.returncode == 0:
         return  # a live server is running on this data dir
     (DATA / "postmaster.pid").unlink(missing_ok=True)
     log = Path(tempfile.gettempdir()) / "artrat-pg-recovery.log"
     # DEVNULL, not captured pipes: the postmaster inherits them and would keep run() waiting.
-    quiet = {"check": True, "stdout": subprocess.DEVNULL, "stderr": subprocess.DEVNULL}
     port = _free_port()
     subprocess.run(
         [str(PG_CTL), "-D", str(DATA), "-w", "-t", "120",
          "-o", f"-p {port} -c listen_addresses=127.0.0.1", "-l", str(log), "start"],
-        **quiet,
+        check=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
     )
-    subprocess.run([str(PG_CTL), "-D", str(DATA), "-w", "-m", "fast", "stop"], **quiet)
+    subprocess.run(
+        [str(PG_CTL), "-D", str(DATA), "-w", "-m", "fast", "stop"],
+        check=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
 
 
 if __name__ == "__main__":

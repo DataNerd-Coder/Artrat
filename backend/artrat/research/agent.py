@@ -285,9 +285,44 @@ def _handle_inspect_portal(rt: Runtime, task: frontier.ClaimedTask) -> None:
             frontier.skip(session, task, "disallowed by robots.txt")
         return
 
-    got = rt.static(task.url, rt.settings, guard=rt.guard)
+    try:
+        got = rt.static(task.url, rt.settings, guard=rt.guard)
+    except FetchFailed:
+        if rt.settings.render_thin_pages:
+            got = rt.rendered(task.url, rt.settings, guard=rt.guard)
+        else:
+            raise
     if len(got.snapshot.text) < rt.settings.thin_text_chars and rt.settings.render_thin_pages:
         got = rt.rendered(task.url, rt.settings, guard=rt.guard)
+
+    # If the portal landing page itself links out to an online form (e.g. forms.gle / Google Forms),
+    # inspect that form hop as well and combine the snapshot text so both requirements and live form
+    # auth/controls are captured in the PortalBlueprint.
+    for ln in got.snapshot.text.splitlines():
+        if ln.startswith("Apply at http"):
+            hop_url = ln.removeprefix("Apply at ").strip()
+            if hop_url != task.url and hop_url != got.snapshot.final_url and rt.robots.allowed(hop_url):
+                try:
+                    hop_got = rt.static(hop_url, rt.settings, guard=rt.guard)
+                    combined_text = (
+                        f"{got.snapshot.text}\n--- Destination Form ({hop_got.snapshot.final_url}) ---\n"
+                        f"{hop_got.snapshot.text}"
+                    )
+                    got = Retrieved(
+                        snapshot=catalogue.SnapshotIn(
+                            url=got.snapshot.url,
+                            final_url=hop_got.snapshot.final_url,
+                            status_code=hop_got.snapshot.status_code,
+                            fetch_mode=got.snapshot.fetch_mode,
+                            title=hop_got.snapshot.title or got.snapshot.title,
+                            text=combined_text,
+                            retrieved_at=hop_got.snapshot.retrieved_at,
+                        ),
+                        links=got.links + hop_got.links,
+                    )
+                    break
+                except (BlockedUrl, FetchFailed):
+                    continue
 
     slug = task.payload["opportunity_slug"]
     direction_slug = task.payload.get("direction_slug")

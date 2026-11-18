@@ -294,12 +294,12 @@ def default_propose(source: SourceSnapshotOut, clean_text: str) -> list[Proposed
             app_url_val = raw_url
             app_url_passage = ln
 
+    if deadline_val is None and app_url_val is None:
+        return []
+
     if app_url_val is None:
         app_url_val = source.final_url
         app_url_passage = heading_line
-
-    if deadline_val is None and app_url_val is None:
-        return []
 
     cycle_match = CYCLE_RE.search(heading_line) or CYCLE_RE.search(clean_text)
     cycle = cycle_match.group(1).replace(" ", "") if cycle_match else str(source.retrieved_at.year)

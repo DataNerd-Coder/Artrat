@@ -198,6 +198,8 @@ def inspect_portal_snapshot(
             "personal statement" in low
             or "statement of purpose" in low
             or "statement of interest" in low
+            or "statement of reason" in low
+            or "research proposal" in low
             or "motivation letter" in low
             or "two-minute video" in low
             or "essay prompt" in low
@@ -212,9 +214,15 @@ def inspect_portal_snapshot(
                 )
             )
 
-        if low.startswith(("i hereby declare", "i certify that", "declaration:")):
+        if low.startswith(("i hereby declare", "i certify that", "declaration:")) or "false statement(s) on the application" in low:
             declarations.append(ln)
 
+        if (
+            "google forms: sign-in" in low
+            or "to continue to google forms" in low
+            or "accounts.google.com" in source.final_url.lower()
+        ) and AuthStep.OAUTH not in auth_steps:
+            auth_steps.append(AuthStep.OAUTH)
         if ("otp" in low or "verification code" in low) and AuthStep.EMAIL_OTP not in auth_steps:
             auth_steps.append(AuthStep.EMAIL_OTP)
         if (
