@@ -169,17 +169,29 @@ class OpenRouterGateway:
         proposals: list[ProposedOpportunity] = []
         reqs = _extract_requirements(clean_text, source)
         for item in parsed.get("opportunities") or []:
-            title_obj = item.get("title") or {}
+            if not isinstance(item, dict):
+                continue
+            title_obj = item.get("title") if isinstance(item.get("title"), dict) else {}
             title_val = title_obj.get("value")
             title_pas = title_obj.get("passage")
             if not title_val or not title_pas:
                 continue
-            cycle = str(item.get("cycle") or source.retrieved_at.year)
-            slug = _slugify(item.get("slug") or f"{title_val}-{cycle.replace('/', '-')}")
+            raw_cycle = item.get("cycle")
+            if isinstance(raw_cycle, dict):
+                raw_cycle = raw_cycle.get("value")
+            cycle = (str(raw_cycle).strip() if raw_cycle else str(source.retrieved_at.year))[:20]
+            raw_slug = item.get("slug")
+            if isinstance(raw_slug, dict):
+                raw_slug = raw_slug.get("value")
+            slug = _slugify(str(raw_slug) if raw_slug else f"{title_val}-{cycle.replace('/', '-')}")
 
-            off_obj = item.get("official_url") or {}
-            app_obj = item.get("application_url") or {}
-            dead_obj = item.get("deadline") or {}
+            off_obj = item.get("official_url") if isinstance(item.get("official_url"), dict) else {}
+            app_obj = (
+                item.get("application_url")
+                if isinstance(item.get("application_url"), dict)
+                else {}
+            )
+            dead_obj = item.get("deadline") if isinstance(item.get("deadline"), dict) else {}
             dead_raw = dead_obj.get("value")
             dead_dt: datetime | None = None
             if isinstance(dead_raw, str) and dead_raw.strip():
