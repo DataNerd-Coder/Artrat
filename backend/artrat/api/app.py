@@ -28,6 +28,7 @@ from artrat.research.links import canonical_url, resolve_dropped_link
 from artrat.research.tables import TaskKind
 from artrat.student import api as student
 from artrat.submission import api as submission
+from artrat.submission.google_forms import fill_and_submit_google_form
 
 
 def get_session():
@@ -103,6 +104,23 @@ class ChatResponseOut(BaseModel):
     audio_output: str | None = None
     reasoning_steps: list[str] = Field(default_factory=list)
     actions: list[dict] = Field(default_factory=list)
+
+
+class FormFillIn(BaseModel):
+    form_url: str = Field(min_length=10)
+    submit: bool = True
+
+
+class FormFillOut(BaseModel):
+    form_title: str
+    form_url: str
+    action_url: str
+    submitted: bool
+    status_code: int
+    confirmation_message: str
+    page_history: str
+    answers: dict[str, str | list[str]]
+    questions: list[dict]
 
 
 @asynccontextmanager
@@ -492,3 +510,28 @@ def chat_endpoint(body: ChatRequestIn, session: DbSession) -> ChatResponseOut:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     except GatewayError as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+
+@app.post("/v1/forms/fill", response_model=FormFillOut)
+def fill_form_endpoint(body: FormFillIn) -> FormFillOut:
+    """Autonomously inspect all sections/pages of a Google Form, generate student-grounded
+    answers, and submit the form."""
+    try:
+        outcome = fill_and_submit_google_form(
+            body.form_url,
+            get_settings(),
+            submit=body.submit,
+        )
+        return FormFillOut(
+            form_title=outcome.form_title,
+            form_url=outcome.form_url,
+            action_url=outcome.action_url,
+            submitted=outcome.submitted,
+            status_code=outcome.status_code,
+            confirmation_message=outcome.confirmation_message,
+            page_history=outcome.page_history,
+            answers=outcome.answers,
+            questions=outcome.questions,
+        )
+    except BlockedUrl as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc

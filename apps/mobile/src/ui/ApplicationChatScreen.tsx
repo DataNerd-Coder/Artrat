@@ -20,6 +20,8 @@ import {
   Download,
   FileText,
   KeyRound,
+  Mic,
+  Paperclip,
   Pencil,
   PenLine,
   RefreshCw,
@@ -32,6 +34,10 @@ import {
   VaultDocument,
 } from '../domain/types';
 import { ArtratBot3D, BotMood } from './ArtratBot3D';
+import {
+  CustomMediaAttachmentSheet,
+  CustomVoiceRecordingBar,
+} from './CustomChatMediaBar';
 import { GeminiCanvasModal } from './GeminiCanvasModal';
 
 interface ApplicationChatScreenProps {
@@ -75,6 +81,8 @@ export const ApplicationChatScreen: React.FC<ApplicationChatScreenProps> = ({
   const [activeCanvasItem, setActiveCanvasItem] =
     useState<OrderedApplicationItem | null>(null);
   const [chatInput, setChatInput] = useState('');
+  const [mediaSheetOpen, setMediaSheetOpen] = useState(false);
+  const [isRecordingVoice, setIsRecordingVoice] = useState(false);
   const [introExpanded, setIntroExpanded] = useState(false);
   const [editingAddressItemId, setEditingAddressItemId] = useState<
     string | null
@@ -687,29 +695,68 @@ export const ApplicationChatScreen: React.FC<ApplicationChatScreenProps> = ({
         ) : null}
       </ScrollView>
 
-      {/* Bottom Chat Composer */}
+      {/* Bottom Chat Composer (WhatsApp / Telegram Style with Audio & Media Input) */}
       <View style={styles.bottomBar}>
-        <View style={styles.composerPill}>
-          <TextInput
-            style={styles.composerInput}
-            value={chatInput}
-            onChangeText={setChatInput}
-            placeholder="Message Artrat or drop another scholarship link..."
-            placeholderTextColor="#756A92"
-            onSubmitEditing={handleSendChat}
+        <CustomMediaAttachmentSheet
+          visible={mediaSheetOpen}
+          onClose={() => setMediaSheetOpen(false)}
+          onSelectMedia={(media) => {
+            onSendMessageInAppChat(
+              application.id,
+              `Shared ${media.fileName} (${media.fileSize})`
+            );
+            showToast(`Shared "${media.fileName}" with Artrat.`);
+          }}
+        />
+        {isRecordingVoice ? (
+          <CustomVoiceRecordingBar
+            onCancel={() => setIsRecordingVoice(false)}
+            onSendVoiceNote={(note) => {
+              setIsRecordingVoice(false);
+              onSendMessageInAppChat(
+                application.id,
+                `🎤 Voice message (${note.durationSec}s)`
+              );
+              showToast('Voice note sent.');
+            }}
           />
-          <Pressable
-            style={[
-              styles.sendCircleBtn,
-              !chatInput.trim() && styles.sendCircleBtnDisabled,
-            ]}
-            onPress={handleSendChat}
-            disabled={!chatInput.trim()}
-            accessibilityLabel="Send message"
-          >
-            <Send size={15} color="#FFFFFF" />
-          </Pressable>
-        </View>
+        ) : (
+          <View style={styles.composerPill}>
+            <Pressable
+              style={{ paddingHorizontal: 8, paddingVertical: 6 }}
+              onPress={() => setMediaSheetOpen((v) => !v)}
+              accessibilityRole="button"
+              accessibilityLabel="Attach photo or document"
+            >
+              <Paperclip size={17} color="#6B5F87" />
+            </Pressable>
+            <TextInput
+              style={styles.composerInput}
+              value={chatInput}
+              onChangeText={setChatInput}
+              placeholder="Message"
+              placeholderTextColor="#756A92"
+              onSubmitEditing={handleSendChat}
+            />
+            {chatInput.trim() ? (
+              <Pressable
+                style={styles.sendCircleBtn}
+                onPress={handleSendChat}
+                accessibilityLabel="Send message"
+              >
+                <Send size={15} color="#FFFFFF" />
+              </Pressable>
+            ) : (
+              <Pressable
+                style={styles.sendCircleBtn}
+                onPress={() => setIsRecordingVoice(true)}
+                accessibilityLabel="Record voice note"
+              >
+                <Mic size={16} color="#FFFFFF" />
+              </Pressable>
+            )}
+          </View>
+        )}
       </View>
 
       {/* Gemini Canvas Writeup / HOD Letter Modal */}

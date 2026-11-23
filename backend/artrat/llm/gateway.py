@@ -694,21 +694,21 @@ class OpenRouterGateway:
     ) -> list[str]:
         steps: list[str] = []
         if has_context:
-            steps.append("Loaded your verified Student Profile, CGPA, and Vault documents")
+            steps.append("Checking your profile, grades, and Vault documents")
         if has_media:
-            steps.append("Extracted visual/document content with Nemotron 3.5 Super VL")
+            steps.append("Reading the document or screenshot you shared")
         if has_audio:
-            steps.append("Processed spoken audio input with Fish Audio S2.1 Pro")
+            steps.append("Listening to your voice message")
         low = message.lower()
         if any(k in low for k in ("search", "find", "scholarship", "november", "closing", "deadline")):
-            steps.append("Queried Thompson + UCB1 + LinUCB statistical discovery ensemble")
+            steps.append("Looking through open scholarships that match your profile")
         if any(k in low for k in ("task", "remind", "todo", "hod", "sign")):
-            steps.append("Prepared action item & synced with Google Tasks")
+            steps.append("Adding this reminder to your Tasks")
         if any(k in low for k in ("calendar", "schedule", "date", "exam", "cbt", "test")):
-            steps.append("Scheduled event & 48-hour alert in Google Calendar")
+            steps.append("Scheduling this date on your calendar with a 48-hour reminder")
         if any(k in low for k in ("draft", "write", "essay", "statement", "sop", "canvas", "letter")):
-            steps.append("Drafted grounded writeup in Gemini Canvas using Ernie 5.5 Flash")
-        steps.append("Synthesized student-grounded response with Baidu ERNIE 5.5 Flash")
+            steps.append("Writing a draft tailored to your background in Canvas")
+        steps.append("Putting your answer together")
         return steps
 
     @staticmethod

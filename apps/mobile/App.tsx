@@ -656,8 +656,8 @@ export default function App() {
             {
               id: replyTurnId,
               sender: 'artrat',
-              text: '● Reading your UNN 200L Vault (4.21 CGPA) & reasoning with Baidu ERNIE 5.5 Flash...',
-              timestamp: 'Thinking...',
+              text: 'Checking your documents and updating your application…',
+              timestamp: 'Thinking…',
             },
           ],
         };

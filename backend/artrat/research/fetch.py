@@ -6,6 +6,8 @@ same Retrieved shape so the rest of the agent never cares how a page was retriev
 """
 
 import io
+import json
+import re
 import xml.etree.ElementTree as ET
 import zipfile
 from dataclasses import dataclass, field
@@ -97,6 +99,33 @@ def parse_page(html: str, base_url: str) -> ParsedPage:
         ).strip()
         if c_label:
             control_lines.append(f"Form Control [{c_type}]: {c_label}")
+    fb_match = re.search(r"FB_PUBLIC_LOAD_DATA_\s*=\s*(\[.*?\]);\s*</script>", html, re.DOTALL)
+    if fb_match:
+        try:
+            fb_data = json.loads(fb_match.group(1))
+            items = fb_data[1][1] if isinstance(fb_data, list) and len(fb_data) > 1 and isinstance(fb_data[1], list) and len(fb_data[1]) > 1 else []
+            for item in items or []:
+                if not isinstance(item, list) or len(item) < 5:
+                    continue
+                q_title = str(item[1] or "").strip()
+                q_type = item[3]
+                entries = item[4]
+                if isinstance(entries, list) and entries:
+                    for ent in entries:
+                        if not isinstance(ent, list) or len(ent) < 3:
+                            continue
+                        ent_id = ent[0]
+                        opts = [str(o[0]) for o in (ent[1] or []) if isinstance(o, list) and o and o[0]]
+                        req = "required" if ent[2] else "optional"
+                        if q_title:
+                            opt_str = f" (options: {', '.join(opts[:10])})" if opts else ""
+                            control_lines.append(
+                                f"Form Control [entry.{ent_id}, type={q_type}, {req}]: {q_title}{opt_str}"
+                            )
+                elif q_title:
+                    control_lines.append(f"Form Section: {q_title}")
+        except (ValueError, KeyError, IndexError, TypeError):
+            pass
     for node in page.css("script, style, noscript, template"):
         node._root.getparent().remove(node._root)
     text = str(page.get_all_text(separator="\n", strip=True))

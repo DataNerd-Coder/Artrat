@@ -393,3 +393,48 @@ export const Lock: React.FC<IconProps> = (props) => (
     {p('M7 11V7a5 5 0 0 1 10 0v4', '2')}
   </SvgIcon>
 );
+
+export const Mic: React.FC<IconProps> = (props) => (
+  <SvgIcon {...props}>
+    {rect(9, 2, 6, 11, 3, '1')}
+    {p('M19 10v2a7 7 0 0 1-14 0v-2', '2')}
+    {line(12, 19, 12, 22, '3')}
+  </SvgIcon>
+);
+
+export const Paperclip: React.FC<IconProps> = (props) => (
+  <SvgIcon {...props}>
+    {p(
+      'm21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48'
+    )}
+  </SvgIcon>
+);
+
+export const ImageIcon: React.FC<IconProps> = (props) => (
+  <SvgIcon {...props}>
+    {rect(3, 3, 18, 18, 2, '1')}
+    {c(9, 9, 2, '2')}
+    {p('m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21', '3')}
+  </SvgIcon>
+);
+
+export const Camera: React.FC<IconProps> = (props) => (
+  <SvgIcon {...props}>
+    {p(
+      'M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z',
+      '1'
+    )}
+    {c(12, 13, 3, '2')}
+  </SvgIcon>
+);
+
+export const Play: React.FC<IconProps> = (props) => (
+  <SvgIcon {...props}>{poly('6 3 20 12 6 21 6 3')}</SvgIcon>
+);
+
+export const Pause: React.FC<IconProps> = (props) => (
+  <SvgIcon {...props}>
+    {rect(6, 4, 4, 16, 1, '1')}
+    {rect(14, 4, 4, 16, 1, '2')}
+  </SvgIcon>
+);
