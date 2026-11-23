@@ -30,16 +30,92 @@ DOM_CONTROLS_JS = """() => {
     }
     const parentLbl = el.closest('label');
     if (parentLbl && parentLbl.innerText.trim()) return parentLbl.innerText.trim();
+    const itemWrap = el.closest('[role="listitem"], .form-group, .field');
+    if (itemWrap) {
+      const heading = itemWrap.querySelector('[role="heading"], label, .M7eMe');
+      if (heading && heading.innerText.trim()) return heading.innerText.trim();
+    }
     return el.getAttribute('aria-label') || el.getAttribute('placeholder') || el.name || el.id || '';
   };
-  return Array.from(document.querySelectorAll('input, select, textarea')).map((el) => ({
+  const controls = Array.from(document.querySelectorAll('input, select, textarea')).map((el) => ({
     tag: el.tagName.toLowerCase(),
     input_type: (el.getAttribute('type') || (el.tagName === 'TEXTAREA' ? 'textarea' : 'text')).toLowerCase(),
     name: el.getAttribute('name') || el.getAttribute('id') || '',
     label: labelFor(el),
     accept: el.getAttribute('accept') || '',
-    required: el.hasAttribute('required'),
+    required: el.hasAttribute('required') || el.getAttribute('aria-required') === 'true',
   }));
+  // Also capture Google Form / SPA question blocks that use custom ARIA widgets instead of <input>
+  Array.from(document.querySelectorAll('[role="listitem"]')).forEach((item, idx) => {
+    const heading = item.querySelector('[role="heading"], .M7eMe');
+    if (!heading || !heading.innerText.trim()) return;
+    const lbl = heading.innerText.trim();
+    const hasFile = /upload|attach|file|pdf|document|result|letter|transcript|photo|id/i.test(item.innerText || '');
+    controls.push({
+      tag: 'div',
+      input_type: hasFile ? 'file' : 'question',
+      name: `question_${idx + 1}`,
+      label: lbl,
+      accept: '',
+      required: item.innerText.includes('*'),
+    });
+  });
+  return controls;
+}"""
+
+AUTO_AUTH_JS = """(creds) => {
+  const setVal = (el, val) => {
+    if (!el || !val) return false;
+    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+    if (setter) setter.call(el, val);
+    else el.value = val;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+    return true;
+  };
+  const pwdInputs = Array.from(document.querySelectorAll('input[type="password"]')).filter(el => el.offsetParent !== null);
+  const emailInput = document.querySelector('input[type="email"], input#identifierId, input[name*="email" i], input[name*="user" i], input[id*="email" i], input[id*="user" i]');
+  if (!pwdInputs.length && !emailInput) return { acted: false, action: 'none' };
+
+  if (emailInput) setVal(emailInput, creds.email);
+  if (pwdInputs.length >= 1) setVal(pwdInputs[0], creds.password);
+  if (pwdInputs.length >= 2) setVal(pwdInputs[1], creds.password);
+
+  const firstInput = document.querySelector('input[name*="first" i], input[id*="first" i]');
+  const lastInput = document.querySelector('input[name*="last" i], input[id*="last" i], input[name*="surname" i]');
+  const phoneInput = document.querySelector('input[type="tel"], input[name*="mobile" i], input[name*="phone" i], input[id*="mobile" i]');
+  if (firstInput) setVal(firstInput, creds.first_name);
+  if (lastInput) setVal(lastInput, creds.last_name);
+  if (phoneInput) setVal(phoneInput, creds.phone);
+
+  const termsBox = document.querySelector('input[type="checkbox"][name*="term" i], input[type="checkbox"][id*="term" i], input[type="checkbox"][name*="accept" i]');
+  if (termsBox && !termsBox.checked) termsBox.click();
+
+  const submitBtn = document.querySelector(
+    '#identifierNext, #passwordNext, button[type="submit"], input[type="submit"], button.login'
+  ) || Array.from(document.querySelectorAll('button, a.btn, [role="button"]')).find(b =>
+    /^(log\s*in|sign\s*in|next|continue|register|create\s*account)$/i.test((b.innerText || b.value || '').trim())
+  );
+  if (submitBtn) {
+    submitBtn.click();
+    return { acted: true, action: pwdInputs.length >= 2 ? 'submitted_registration' : 'submitted_login' };
+  }
+  return { acted: false, action: 'filled_only' };
+}"""
+
+CLICK_SAFE_NEXT_STEP_JS = """() => {
+  // Never click final Submit buttons during a dry-run; only click Next / Continue / Tab panels
+  const candidates = Array.from(document.querySelectorAll('button, [role="button"], a.nav-link, [role="tab"]'));
+  for (const el of candidates) {
+    const txt = (el.innerText || el.getAttribute('aria-label') || '').trim();
+    if (!txt || /submit|finish|complete\s+application|declare|send|delete|cancel|log\s*out/i.test(txt)) continue;
+    if (/^(next|continue|proceed|step\s*\d+|personal|academic|education|documents?|uploads?|requirements?)$/i.test(txt) && !el.dataset.artratVisited) {
+      el.dataset.artratVisited = '1';
+      el.click();
+      return txt;
+    }
+  }
+  return '';
 }"""
 
 
@@ -131,9 +207,48 @@ async def _remove_profile(path: str) -> None:
     raise RuntimeError(f"could not delete browser profile {path}")
 
 
+def _parse_raw_controls(raw_controls: object) -> list[DomControl]:
+    if isinstance(raw_controls, str):
+        try:
+            raw_controls = json.loads(raw_controls)
+        except json.JSONDecodeError:
+            raw_controls = []
+    if not isinstance(raw_controls, list):
+        return []
+    out: list[DomControl] = []
+    for item in raw_controls:
+        if isinstance(item, dict):
+            try:
+                out.append(DomControl.model_validate(item))
+            except Exception:
+                continue
+    return out
+
+
+def _inspector_credentials() -> dict[str, str]:
+    return {
+        "email": os.environ.get("ARTRAT_INSPECTOR_EMAIL", "").strip(),
+        "password": os.environ.get("ARTRAT_INSPECTOR_PASSWORD", "").strip(),
+        "first_name": os.environ.get("ARTRAT_INSPECTOR_FIRST_NAME", "Artrat").strip(),
+        "last_name": os.environ.get("ARTRAT_INSPECTOR_LAST_NAME", "Inspector").strip(),
+        "phone": os.environ.get("ARTRAT_INSPECTOR_PHONE", "08030000000").strip(),
+    }
+
+
 async def render(url: str, *, include_controls: bool = False) -> RenderResult:
     assert_public_http_url(url)
     user_data_dir = tempfile.mkdtemp(prefix="artrat-browser-")
+    collected_controls: list[DomControl] = []
+    seen_control_keys: set[tuple[str, str, str]] = set()
+    html_snapshots: list[str] = []
+
+    def add_controls(new_ctrls: list[DomControl]) -> None:
+        for c in new_ctrls:
+            key = (c.tag, c.input_type, c.label or c.name)
+            if key not in seen_control_keys:
+                seen_control_keys.add(key)
+                collected_controls.append(c)
+
     try:
         session = BrowserSession(browser_profile=_profile(user_data_dir))
         try:
@@ -145,23 +260,55 @@ async def render(url: str, *, include_controls: bool = False) -> RenderResult:
             final_url = _unwrap_google_continue_url(raw_final_url)
             assert_public_http_url(final_url)
             html = await page.evaluate("() => document.documentElement.outerHTML")
+            html_snapshots.append(html)
             title = await session.get_current_page_title()
-            raw_controls = await page.evaluate(DOM_CONTROLS_JS) if include_controls else []
+            if include_controls:
+                add_controls(_parse_raw_controls(await page.evaluate(DOM_CONTROLS_JS)))
+
+                # If the dry-run encounters an auth screen (Login / Sign-In / Google OAuth) and
+                # inspector credentials are configured, authenticate and walk into the form.
+                creds = _inspector_credentials()
+                if creds["email"] and creds["password"]:
+                    for _ in range(2):
+                        auth_res = await page.evaluate(AUTO_AUTH_JS, creds)
+                        if isinstance(auth_res, str):
+                            try:
+                                auth_res = json.loads(auth_res)
+                            except json.JSONDecodeError:
+                                auth_res = {}
+                        if not isinstance(auth_res, dict) or not auth_res.get("acted"):
+                            break
+                        await asyncio.sleep(1.5)
+                        cur_url = await session.get_current_page_url()
+                        assert_public_http_url(cur_url)
+                        final_url = _unwrap_google_continue_url(cur_url)
+                        step_html = await page.evaluate("() => document.documentElement.outerHTML")
+                        if step_html not in html_snapshots:
+                            html_snapshots.append(step_html)
+                        add_controls(_parse_raw_controls(await page.evaluate(DOM_CONTROLS_JS)))
+
+                # Walk through safe Next / Continue / Tab steps (never clicking final Submit)
+                for _ in range(4):
+                    clicked_step = await page.evaluate(CLICK_SAFE_NEXT_STEP_JS)
+                    if not clicked_step:
+                        break
+                    await asyncio.sleep(0.8)
+                    cur_url = await session.get_current_page_url()
+                    assert_public_http_url(cur_url)
+                    step_html = await page.evaluate("() => document.documentElement.outerHTML")
+                    if step_html not in html_snapshots:
+                        html_snapshots.append(step_html)
+                    add_controls(_parse_raw_controls(await page.evaluate(DOM_CONTROLS_JS)))
         finally:
             await session.kill()
     finally:
         await _remove_profile(user_data_dir)
-    if isinstance(raw_controls, str):
-        try:
-            raw_controls = json.loads(raw_controls)
-        except json.JSONDecodeError:
-            raw_controls = []
-    controls = [DomControl.model_validate(c) for c in (raw_controls or [])]
+    combined_html = html_snapshots[-1] if len(html_snapshots) == 1 else "\n".join(html_snapshots)
     return RenderResult(
         final_url=final_url,
         title=title or None,
-        html=html,
-        controls=controls,
+        html=combined_html,
+        controls=collected_controls,
         retrieved_at=datetime.now(UTC),
     )
 

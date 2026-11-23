@@ -309,16 +309,49 @@ def _handle_extract(rt: Runtime, task: frontier.ClaimedTask) -> None:
         )
 
 
+def _has_auth_wall(got: Retrieved) -> bool:
+    low_url = got.snapshot.final_url.lower()
+    low_text = got.snapshot.text.lower()
+    return (
+        "/login" in low_url
+        or "/signin" in low_url
+        or "form control [password]" in low_text
+        or "google forms: sign-in" in low_text
+        or "to continue to google forms" in low_text
+    )
+
+
 def _fetch_portal_page(rt: Runtime, url: str) -> Retrieved:
     try:
         got = rt.static(url, rt.settings, guard=rt.guard)
     except FetchFailed:
         if rt.settings.render_thin_pages:
-            got = rt.rendered(url, rt.settings, guard=rt.guard)
-        else:
-            raise
+            return rt.rendered(url, rt.settings, guard=rt.guard)
+        raise
     if len(got.snapshot.text) < rt.settings.thin_text_chars and rt.settings.render_thin_pages:
-        got = rt.rendered(url, rt.settings, guard=rt.guard)
+        return rt.rendered(url, rt.settings, guard=rt.guard)
+    if _has_auth_wall(got) and rt.settings.render_thin_pages:
+        try:
+            rendered_got = rt.rendered(url, rt.settings, guard=rt.guard)
+            combined_text = (
+                got.snapshot.text
+                if rendered_got.snapshot.text in got.snapshot.text
+                else f"{got.snapshot.text}\n{rendered_got.snapshot.text}"
+            )
+            return Retrieved(
+                snapshot=catalogue.SnapshotIn(
+                    url=rendered_got.snapshot.url,
+                    final_url=rendered_got.snapshot.final_url,
+                    status_code=rendered_got.snapshot.status_code,
+                    fetch_mode=rendered_got.snapshot.fetch_mode,
+                    title=rendered_got.snapshot.title or got.snapshot.title,
+                    text=combined_text,
+                    retrieved_at=rendered_got.snapshot.retrieved_at,
+                ),
+                links=list(got.links) + list(rendered_got.links),
+            )
+        except FetchFailed:
+            return got
     return got
 
 
